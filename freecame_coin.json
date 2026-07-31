@@ -1,0 +1,730 @@
+{
+  "version": 3,
+  "turbo_mode": false,
+  "steps": [
+    {
+      "mode": "บวกเลข OCR",
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_641148_1784834592.png",
+      "confidence": 0.8,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2505,
+        "y": 1463,
+        "w": 218,
+        "h": 55
+      },
+      "click_targets": [],
+      "counting_targets": []
+    },
+    {
+      "mode": "บอตปกติ",
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_934087_1784747701.png",
+      "confidence": 0.81,
+      "delay": 1.4000000000000004,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2186,
+        "y": 1214,
+        "w": 315,
+        "h": 99
+      },
+      "click_targets": [
+        {
+          "x": 2341,
+          "y": 1663,
+          "delay_after": "10",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ],
+      "counting_targets": []
+    },
+    {
+      "mode": "บอตปกติ",
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_821341_1784799483.png",
+      "confidence": 0.8,
+      "delay": "5-10",
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2108,
+        "y": 1323,
+        "w": 507,
+        "h": 285
+      },
+      "click_targets": [
+        {
+          "x": 2358,
+          "y": 1536,
+          "delay_after": 0.0,
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ],
+      "counting_targets": []
+    },
+    {
+      "mode": "บอตปกติ",
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_716483_1784746840.png",
+      "confidence": 0.73,
+      "delay": 0.09999999999999964,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 1947,
+        "y": 1433,
+        "w": 271,
+        "h": 207
+      },
+      "click_targets": [
+        {
+          "x": 2012,
+          "y": 1651,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2007,
+          "y": 1641,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2003,
+          "y": 1644,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2015,
+          "y": 1665,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 1999,
+          "y": 1628,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2007,
+          "y": 1644,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2002,
+          "y": 1639,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 1988,
+          "y": 1643,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2002,
+          "y": 1575,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 1993,
+          "y": 1619,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2021,
+          "y": 1648,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2024,
+          "y": 1620,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2022,
+          "y": 1689,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2023,
+          "y": 1677,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2006,
+          "y": 1673,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2018,
+          "y": 1664,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2119,
+          "y": 1610,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2006,
+          "y": 1663,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2052,
+          "y": 1656,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2014,
+          "y": 1666,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2000,
+          "y": 1627,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 1981,
+          "y": 1655,
+          "delay_after": "0.13-0.2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ],
+      "counting_targets": []
+    },
+    {
+      "mode": "บอตปกติ",
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_952177_1784746062.png",
+      "confidence": 0.6699999999999999,
+      "delay": "0.1",
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 1871,
+        "y": 1333,
+        "w": 408,
+        "h": 294
+      },
+      "click_targets": [
+        {
+          "x": 2033,
+          "y": 1622,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 1977,
+          "y": 1636,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 1988,
+          "y": 1652,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 1993,
+          "y": 1640,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2004,
+          "y": 1644,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2004,
+          "y": 1657,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 1999,
+          "y": 1643,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2019,
+          "y": 1619,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2062,
+          "y": 1652,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2068,
+          "y": 1648,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2036,
+          "y": 1640,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 1992,
+          "y": 1658,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2036,
+          "y": 1691,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 1988,
+          "y": 1684,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2046,
+          "y": 1646,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2007,
+          "y": 1672,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2050,
+          "y": 1661,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2003,
+          "y": 1624,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 1985,
+          "y": 1636,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 1983,
+          "y": 1650,
+          "delay_after": "0.13-0.17",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ],
+      "counting_targets": []
+    },
+    {
+      "mode": "บอตปกติ",
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_583399_1784732577.png",
+      "confidence": 0.77,
+      "delay": "1.5-30",
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2437,
+        "y": 1308,
+        "w": 307,
+        "h": 327
+      },
+      "click_targets": [
+        {
+          "x": 2583,
+          "y": 1676,
+          "delay_after": "1-3",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2287,
+          "y": 1651,
+          "delay_after": "1-3",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2693,
+          "y": 1348,
+          "delay_after": "1-3",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2339,
+          "y": 1632,
+          "delay_after": "5-7",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ],
+      "counting_targets": []
+    },
+    {
+      "mode": "บอตปกติ",
+      "template_path": "C:/Users/Lenovo/OneDrive/รูปภาพ/Screenshots/2nd.png",
+      "confidence": 0.75,
+      "delay": "10-20",
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2247,
+        "y": 1365,
+        "w": 236,
+        "h": 183
+      },
+      "click_targets": [
+        {
+          "x": 2350,
+          "y": 1450,
+          "delay_after": 0.0,
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ],
+      "counting_targets": []
+    },
+    {
+      "mode": "บอตปกติ",
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_178333_1784733229.png",
+      "confidence": 0.8,
+      "delay": "1-3",
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2345,
+        "y": 1597,
+        "w": 278,
+        "h": 120
+      },
+      "click_targets": [
+        {
+          "x": 2222,
+          "y": 1654,
+          "delay_after": "2-5",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ],
+      "counting_targets": []
+    },
+    {
+      "mode": "บอตปกติ",
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_461407_1784733259.png",
+      "confidence": 0.8,
+      "delay": "10-16",
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2238,
+        "y": 1615,
+        "w": 239,
+        "h": 111
+      },
+      "click_targets": [
+        {
+          "x": 2363,
+          "y": 1672,
+          "delay_after": "4-8",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2355,
+          "y": 1674,
+          "delay_after": 0.0,
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ],
+      "counting_targets": []
+    },
+    {
+      "mode": "บอตปกติ",
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_233085_1784798975.png",
+      "confidence": 0.77,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2387,
+        "y": 1561,
+        "w": 298,
+        "h": 68
+      },
+      "click_targets": [
+        {
+          "x": 2531,
+          "y": 1650,
+          "delay_after": 0.0,
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ],
+      "counting_targets": []
+    },
+    {
+      "mode": "บอตปกติ",
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_584286_1784799579.png",
+      "confidence": 0.79,
+      "delay": 1.299999999999999,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2104,
+        "y": 1321,
+        "w": 524,
+        "h": 280
+      },
+      "click_targets": [
+        {
+          "x": 2360,
+          "y": 1532,
+          "delay_after": 0.0,
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ],
+      "counting_targets": []
+    },
+    {
+      "mode": "บอตปกติ",
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_912999_1784800429.png",
+      "confidence": 0.8,
+      "delay": 2.0999999999999996,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2114,
+        "y": 1323,
+        "w": 503,
+        "h": 280
+      },
+      "click_targets": [
+        {
+          "x": 2357,
+          "y": 1535,
+          "delay_after": 0.0,
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ],
+      "counting_targets": []
+    },
+    {
+      "mode": "บอตปกติ",
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_629981_1784811042.png",
+      "confidence": 0.86,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2080,
+        "y": 1299,
+        "w": 560,
+        "h": 331
+      },
+      "click_targets": [
+        {
+          "x": 2343,
+          "y": 1546,
+          "delay_after": 0.0,
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ],
+      "counting_targets": []
+    }
+  ]
+}

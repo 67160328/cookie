@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "turbo_mode": true,
+  "steps": [
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_477898_1784279655.png",
+      "confidence": 0.8,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": null,
+      "click_targets": []
+    }
+  ]
+}

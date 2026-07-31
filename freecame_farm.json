@@ -1,0 +1,156 @@
+{
+  "version": 2,
+  "turbo_mode": false,
+  "steps": [
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_753224_1784726009.png",
+      "confidence": 0.8,
+      "delay": "3-6",
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 1857,
+        "y": 1272,
+        "w": 279,
+        "h": 272
+      },
+      "click_targets": [
+        {
+          "x": 2763,
+          "y": 1205,
+          "delay_after": "0-2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2336,
+          "y": 1506,
+          "delay_after": "0-2",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2331,
+          "y": 1474,
+          "delay_after": 0.0,
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_249608_1784726038.png",
+      "confidence": 0.95,
+      "delay": "4-6",
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2344,
+        "y": 1601,
+        "w": 267,
+        "h": 101
+      },
+      "click_targets": [
+        {
+          "x": 2200,
+          "y": 1662,
+          "delay_after": 0.0,
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_495231_1784726062.png",
+      "confidence": 0.8,
+      "delay": "8-12",
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2215,
+        "y": 1622,
+        "w": 261,
+        "h": 97
+      },
+      "click_targets": [
+        {
+          "x": 2344,
+          "y": 1669,
+          "delay_after": "2-5",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2344,
+          "y": 1665,
+          "delay_after": 0.0,
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_452206_1784725875.png",
+      "confidence": 0.8,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 2430,
+        "y": 1234,
+        "w": 311,
+        "h": 341
+      },
+      "click_targets": [
+        {
+          "x": 2576,
+          "y": 1670,
+          "delay_after": "2-5",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2532,
+          "y": 1647,
+          "delay_after": "10-30",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2717,
+          "y": 1643,
+          "delay_after": "10-20",
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        },
+        {
+          "x": 2703,
+          "y": 1655,
+          "delay_after": 0.0,
+          "click_count": 1,
+          "action": "click",
+          "type_text": "",
+          "delay_before_type": 0.2
+        }
+      ]
+    }
+  ]
+}

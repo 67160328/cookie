@@ -1,0 +1,483 @@
+{
+  "version": 2,
+  "turbo_mode": false,
+  "steps": [
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_889850_1784280213.png",
+      "confidence": 1.0,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 489,
+        "y": 273,
+        "w": 1922,
+        "h": 1080
+      },
+      "click_targets": [
+        {
+          "x": 1495,
+          "y": 1262,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_413471_1784280276.png",
+      "confidence": 1.0,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 491,
+        "y": 276,
+        "w": 1917,
+        "h": 1073
+      },
+      "click_targets": [
+        {
+          "x": 1679,
+          "y": 960,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_699718_1784280416.png",
+      "confidence": 0.94,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 491,
+        "y": 273,
+        "w": 1917,
+        "h": 1078
+      },
+      "click_targets": [
+        {
+          "x": 2178,
+          "y": 387,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_292124_1784280644.png",
+      "confidence": 0.8,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 499,
+        "y": 271,
+        "w": 1913,
+        "h": 1080
+      },
+      "click_targets": [
+        {
+          "x": 1895,
+          "y": 525,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_470861_1784280699.png",
+      "confidence": 0.8,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 494,
+        "y": 270,
+        "w": 1914,
+        "h": 1077
+      },
+      "click_targets": [
+        {
+          "x": 1961,
+          "y": 1203,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:/Users/Lenovo/Downloads/cookie/LAST.png",
+      "confidence": 0.8,
+      "delay": 0.9000000000000004,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 491,
+        "y": 272,
+        "w": 1917,
+        "h": 1075
+      },
+      "click_targets": [
+        {
+          "x": 1465,
+          "y": 967,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_717987_1784280796.png",
+      "confidence": 0.8,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 492,
+        "y": 275,
+        "w": 1908,
+        "h": 1070
+      },
+      "click_targets": [
+        {
+          "x": 1666,
+          "y": 1016,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_843128_1784281178.png",
+      "confidence": 0.8,
+      "delay": 1.0999999999999996,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 930,
+        "y": 514,
+        "w": 1045,
+        "h": 588
+      },
+      "click_targets": [
+        {
+          "x": 1428,
+          "y": 962,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_264389_1784281451.png",
+      "confidence": 0.8,
+      "delay": 1.0999999999999996,
+      "action_type": "พิมพ์ข้อความ",
+      "type_text": "",
+      "search_region": {
+        "x": 496,
+        "y": 275,
+        "w": 1912,
+        "h": 1078
+      },
+      "click_targets": [
+        {
+          "x": 2283,
+          "y": 334,
+          "delay_after": 0.0,
+          "click_count": 1
+        },
+        {
+          "x": 1418,
+          "y": 911,
+          "delay_after": 0.5,
+          "click_count": 1
+        },
+        {
+          "x": 1424,
+          "y": 848,
+          "delay_after": 0.5,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_919977_1784281720.png",
+      "confidence": 0.8,
+      "delay": 0.09999999999999964,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 1030,
+        "y": 391,
+        "w": 834,
+        "h": 192
+      },
+      "click_targets": [
+        {
+          "x": 1444,
+          "y": 1129,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_173513_1784281829.png",
+      "confidence": 0.8,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 943,
+        "y": 425,
+        "w": 1051,
+        "h": 276
+      },
+      "click_targets": [
+        {
+          "x": 1437,
+          "y": 1074,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_148089_1784281777.png",
+      "confidence": 1.0,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 789,
+        "y": 358,
+        "w": 1333,
+        "h": 962
+      },
+      "click_targets": [
+        {
+          "x": 1447,
+          "y": 1264,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_711747_1784285232.png",
+      "confidence": 0.97,
+      "delay": 1.0999999999999996,
+      "action_type": "พิมพ์ข้อความ",
+      "type_text": "invated{enter}",
+      "search_region": {
+        "x": 495,
+        "y": 276,
+        "w": 1905,
+        "h": 136
+      },
+      "click_targets": [
+        {
+          "x": 1246,
+          "y": 866,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_376446_1784285427.png",
+      "confidence": 1.0,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 877,
+        "y": 513,
+        "w": 1148,
+        "h": 597
+      },
+      "click_targets": [
+        {
+          "x": 1437,
+          "y": 1003,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_556022_1784285133.png",
+      "confidence": 1.0,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 853,
+        "y": 485,
+        "w": 1192,
+        "h": 645
+      },
+      "click_targets": [
+        {
+          "x": 1400,
+          "y": 843,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_776507_1784283674.png",
+      "confidence": 1.0,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 710,
+        "y": 485,
+        "w": 245,
+        "h": 244
+      },
+      "click_targets": [
+        {
+          "x": 1448,
+          "y": 420,
+          "delay_after": 1.0,
+          "click_count": 1
+        },
+        {
+          "x": 1781,
+          "y": 451,
+          "delay_after": 1.0,
+          "click_count": 1
+        },
+        {
+          "x": 1587,
+          "y": 1138,
+          "delay_after": 1.0,
+          "click_count": 1
+        },
+        {
+          "x": 1806,
+          "y": 1156,
+          "delay_after": 1.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_169437_1784282660.png",
+      "confidence": 1.0,
+      "delay": 0.09999999999999964,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 1232,
+        "y": 276,
+        "w": 370,
+        "h": 90
+      },
+      "click_targets": [
+        {
+          "x": 1915,
+          "y": 1246,
+          "delay_after": 3.0,
+          "click_count": 1
+        },
+        {
+          "x": 2004,
+          "y": 728,
+          "delay_after": 2.5,
+          "click_count": 30
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_555001_1784282992.png",
+      "confidence": 0.8,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 665,
+        "y": 299,
+        "w": 1591,
+        "h": 1037
+      },
+      "click_targets": [
+        {
+          "x": 1468,
+          "y": 1247,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_726075_1784283037.png",
+      "confidence": 0.8,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 930,
+        "y": 521,
+        "w": 1043,
+        "h": 576
+      },
+      "click_targets": [
+        {
+          "x": 1234,
+          "y": 972,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_201748_1784284363.png",
+      "confidence": 1.0,
+      "delay": 1.0,
+      "action_type": "พิมพ์ข้อความ",
+      "type_text": "",
+      "search_region": {
+        "x": 649,
+        "y": 276,
+        "w": 188,
+        "h": 90
+      },
+      "click_targets": [
+        {
+          "x": 2180,
+          "y": 321,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    },
+    {
+      "template_path": "C:\\ProjectFreecameAuto\\captured_templates\\template_722814_1784284141.png",
+      "confidence": 0.8,
+      "delay": 1.5,
+      "action_type": "คลิกเมาส์",
+      "type_text": "",
+      "search_region": {
+        "x": 675,
+        "y": 325,
+        "w": 1556,
+        "h": 983
+      },
+      "click_targets": [
+        {
+          "x": 1221,
+          "y": 1204,
+          "delay_after": 0.0,
+          "click_count": 1
+        }
+      ]
+    }
+  ]
+}
