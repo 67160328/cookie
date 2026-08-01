@@ -1876,8 +1876,8 @@ class FreecameAutoApp(ctk.CTk):
         step_data["lbl_ocr_result_text"] = lbl_ocr_text_val
 
         self.steps.append(step_data)
-        self.change_step_mode(step_id, "บอตปกติ")
-        self.add_log(f"[+] เพิ่มขั้นตอนที่ {len(self.steps)} โหมด: บอตปกติ")
+        self.change_step_mode(step_id, mode)
+        self.add_log(f"[+] เพิ่มขั้นตอนที่ {len(self.steps)} โหมด: {mode}")
         
         # Auto scroll to bottom
         scroll_container._parent_canvas.yview_moveto(1.0)
