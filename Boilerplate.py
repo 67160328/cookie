@@ -553,6 +553,23 @@ class FreecameAutoApp(ctk.CTk):
         )
         self.load_btn.pack(side="left", padx=2)
 
+        # Delete Multiple Steps Button
+        self.del_multi_steps_btn = ctk.CTkButton(
+            left_controls,
+            corner_radius=8,
+            text="🗑️ ลบหลายขั้นตอน",
+            fg_color="transparent",
+            border_color=("#CBD5E1", "#1E293B"),
+            border_width=1.5,
+            hover_color=("#FEE2E2", "#450a0a"),
+            text_color=("#EF4444", "#F87171"),
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            command=self.open_delete_multiple_steps_dialog,
+            height=30,
+            width=120
+        )
+        self.del_multi_steps_btn.pack(side="left", padx=2)
+
         # Turbo switch
         self.turbo_switch = ctk.CTkSwitch(
             left_controls,
@@ -1429,6 +1446,23 @@ class FreecameAutoApp(ctk.CTk):
             command=lambda sid=step_id: self.open_coordinate_picker_add(sid)
         )
         add_point_btn.pack(side="right")
+        
+        # Clear All Click Targets Button
+        clear_points_btn = ctk.CTkButton(
+            click_section_header,
+            corner_radius=8,
+            text="🗑️ ลบทั้งหมด",
+            fg_color="transparent",
+            border_color=("#CBD5E1", "#1E293B"),
+            border_width=1.5,
+            hover_color=("#FEE2E2", "#450a0a"),
+            text_color=("#EF4444", "#F87171"),
+            font=ctk.CTkFont(size=10, weight="bold"),
+            width=70,
+            height=22,
+            command=lambda sid=step_id: self.clear_all_click_targets(sid)
+        )
+        clear_points_btn.pack(side="right", padx=(0, 5))
         
         click_targets_frame = ctk.CTkFrame(right_col, fg_color=("#F1F5F9", "#121214"), corner_radius=5)
         click_targets_frame.pack(fill="x", pady=(0, 6))
@@ -2643,6 +2677,151 @@ class FreecameAutoApp(ctk.CTk):
 
         idx = self.steps.index(step) + 1
         self.add_log(f"[-] ลบจุดคลิกที่ {point_index + 1} เรียบร้อย")
+
+    def clear_all_click_targets(self, step_id):
+        step = next((s for s in self.steps if s["id"] == step_id), None)
+        if step is None:
+            return
+        if not step["click_targets"]:
+            return
+            
+        if not messagebox.askyesno("ยืนยัน", "คุณต้องการลบจุดคลิกทั้งหมดของขั้นตอนนี้ใช่หรือไม่?"):
+            return
+            
+        step["click_targets"].clear()
+        self._rebuild_click_targets_ui(step)
+        
+        idx = self.steps.index(step) + 1
+        self.add_log(f"[-] ขั้นตอนที่ {idx}: ลบจุดคลิกทั้งหมดเรียบร้อยแล้ว")
+
+    def open_delete_multiple_steps_dialog(self):
+        if not self.steps:
+            messagebox.showinfo("ข้อมูล", "ไม่มีขั้นตอนในระบบให้ลบ")
+            return
+            
+        dialog = ctk.CTkToplevel(self)
+        dialog.title("ลบหลายขั้นตอนพร้อมกัน")
+        dialog.geometry("450x550")
+        dialog.transient(self)
+        dialog.grab_set()
+        dialog.resizable(False, False)
+        
+        # Center dialog
+        x = self.winfo_x() + (self.winfo_width() // 2) - 225
+        y = self.winfo_y() + (self.winfo_height() // 2) - 275
+        dialog.geometry(f"+{x}+{y}")
+        
+        dialog.configure(fg_color=BG_COLOR)
+        
+        lbl_title = ctk.CTkLabel(
+            dialog,
+            text="เลือกขั้นตอนที่ต้องการลบ",
+            font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"),
+            text_color=ACCENT_ORANGE
+        )
+        lbl_title.pack(pady=(15, 10))
+        
+        # Checkboxes list frame
+        scroll_frame = ctk.CTkScrollableFrame(
+            dialog,
+            fg_color=CARD_BG,
+            scrollbar_button_color=("#CBD5E1", "#334155"),
+            height=350
+        )
+        scroll_frame.pack(fill="both", expand=True, padx=20, pady=10)
+        
+        checkbox_vars = {}
+        checkbox_widgets = []
+        
+        # Select All Checkbox
+        select_all_var = ctk.BooleanVar(value=False)
+        
+        def toggle_select_all():
+            val = select_all_var.get()
+            for v in checkbox_vars.values():
+                v.set(val)
+            update_del_btn_text()
+                
+        chk_all = ctk.CTkCheckBox(
+            dialog,
+            text="เลือกทั้งหมด (Select All)",
+            variable=select_all_var,
+            command=toggle_select_all,
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            checkbox_width=18,
+            checkbox_height=18,
+            border_width=2,
+            border_color=("#94A3B8", "#475569"),
+            hover_color=ACCENT_HOVER,
+            fg_color=ACCENT_ORANGE,
+            text_color=TEXT_COLOR
+        )
+        chk_all.pack(anchor="w", padx=30, pady=5)
+        
+        # Add checkboxes for each step
+        for i, step in enumerate(self.steps):
+            step_id = step["id"]
+            name_val = step.get("step_name", "")
+            mode_val = step["mode"]
+            display_name = f"ขั้นตอนที่ {i+1}: {name_val}" if name_val else f"ขั้นตอนที่ {i+1} ({mode_val})"
+            
+            var = ctk.BooleanVar(value=False)
+            checkbox_vars[step_id] = var
+            
+            chk = ctk.CTkCheckBox(
+                scroll_frame,
+                text=display_name,
+                variable=var,
+                command=lambda: update_del_btn_text(),
+                font=ctk.CTkFont(family="Segoe UI", size=12),
+                checkbox_width=18,
+                checkbox_height=18,
+                border_width=2,
+                border_color=("#94A3B8", "#475569"),
+                hover_color=ACCENT_HOVER,
+                fg_color=ACCENT_ORANGE,
+                text_color=TEXT_COLOR
+            )
+            chk.pack(anchor="w", padx=10, pady=6)
+            checkbox_widgets.append(chk)
+            
+        def update_del_btn_text():
+            count = sum(1 for v in checkbox_vars.values() if v.get())
+            btn_del.configure(text=f"🗑️ ลบขั้นตอนที่เลือก ({count})")
+            if count == len(self.steps):
+                select_all_var.set(True)
+            else:
+                select_all_var.set(False)
+                
+        def confirm_delete():
+            selected_ids = [sid for sid, v in checkbox_vars.items() if v.get()]
+            if not selected_ids:
+                messagebox.showinfo("ข้อมูล", "กรุณาเลือกขั้นตอนที่ต้องการลบอย่างน้อย 1 ขั้นตอน")
+                return
+                
+            if not messagebox.askyesno("ยืนยันการลบ", f"คุณต้องการลบขั้นตอนที่เลือกทั้งหมด {len(selected_ids)} ขั้นตอนใช่หรือไม่?"):
+                return
+                
+            self.steps = [s for s in self.steps if s["id"] not in selected_ids]
+            
+            self.reorder_step_cards_ui()
+            self.rebuild_jump_sidebars()
+            
+            self.add_log(f"[-] ลบหลายขั้นตอนพร้อมกันสำเร็จ: {len(selected_ids)} ขั้นตอน")
+            dialog.destroy()
+            
+        btn_del = ctk.CTkButton(
+            dialog,
+            corner_radius=8,
+            text="🗑️ ลบขั้นตอนที่เลือก (0)",
+            fg_color=("#EF4444", "#DC2626"),
+            hover_color=("#DC2626", "#B91C1C"),
+            text_color="#FFFFFF",
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            command=confirm_delete,
+            height=36
+        )
+        btn_del.pack(fill="x", padx=20, pady=(10, 20))
 
     def _rebuild_click_targets_ui(self, step):
         frame = step["click_targets_frame"]
