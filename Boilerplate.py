@@ -2868,6 +2868,14 @@ class FreecameAutoApp(ctk.CTk):
             if not messagebox.askyesno("ยืนยันการลบ", f"คุณต้องการลบขั้นตอนที่เลือกทั้งหมด {len(selected_ids)} ขั้นตอนใช่หรือไม่?"):
                 return
                 
+            # Destroy the deleted step widgets
+            for step in self.steps:
+                if step["id"] in selected_ids:
+                    try:
+                        step["card_frame"].destroy()
+                    except Exception:
+                        pass
+                        
             self.steps = [s for s in self.steps if s["id"] not in selected_ids]
             
             self.reorder_step_cards_ui()
