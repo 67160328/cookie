@@ -1464,6 +1464,23 @@ class FreecameAutoApp(ctk.CTk):
         )
         clear_points_btn.pack(side="right", padx=(0, 5))
         
+        # Delete Selected Click Targets Button
+        del_sel_points_btn = ctk.CTkButton(
+            click_section_header,
+            corner_radius=8,
+            text="🗑️ ลบที่เลือก",
+            fg_color="transparent",
+            border_color=("#CBD5E1", "#1E293B"),
+            border_width=1.5,
+            hover_color=("#FEE2E2", "#450a0a"),
+            text_color=("#EF4444", "#F87171"),
+            font=ctk.CTkFont(size=10, weight="bold"),
+            width=70,
+            height=22,
+            command=lambda sid=step_id: self.delete_selected_click_targets(sid)
+        )
+        del_sel_points_btn.pack(side="right", padx=(0, 5))
+        
         click_targets_frame = ctk.CTkFrame(right_col, fg_color=("#F1F5F9", "#121214"), corner_radius=5)
         click_targets_frame.pack(fill="x", pady=(0, 6))
         step_data["click_targets_frame"] = click_targets_frame
@@ -2348,6 +2365,25 @@ class FreecameAutoApp(ctk.CTk):
         
         ctk.CTkLabel(row_frame, text="รอ:", font=ctk.CTkFont(size=9), text_color=TEXT_MUTED).pack(side="right", padx=(4, 2))
 
+        # Checkbox for batch deletion selection
+        chk_var = ctk.BooleanVar(value=False)
+        point["_selected_for_del"] = chk_var
+        
+        chk_select = ctk.CTkCheckBox(
+            row_frame,
+            text="",
+            variable=chk_var,
+            width=18,
+            height=18,
+            checkbox_width=14,
+            checkbox_height=14,
+            border_width=1.5,
+            border_color=("#94A3B8", "#475569"),
+            hover_color=ACCENT_HOVER,
+            fg_color=ACCENT_ORANGE
+        )
+        chk_select.pack(side="left", padx=(5, 1))
+
         badge = ctk.CTkLabel(
             row_frame,
             text=f" {point_index + 1} ",
@@ -2358,7 +2394,7 @@ class FreecameAutoApp(ctk.CTk):
             width=20,
             height=18
         )
-        badge.pack(side="left", padx=(5, 4), pady=4)
+        badge.pack(side="left", padx=(2, 4), pady=4)
 
         ctk.CTkLabel(row_frame, text="X:", font=ctk.CTkFont(size=9), text_color=TEXT_MUTED).pack(side="left", padx=(2, 1))
         x_entry = ctk.CTkEntry(
@@ -2693,6 +2729,36 @@ class FreecameAutoApp(ctk.CTk):
         
         idx = self.steps.index(step) + 1
         self.add_log(f"[-] ขั้นตอนที่ {idx}: ลบจุดคลิกทั้งหมดเรียบร้อยแล้ว")
+
+    def delete_selected_click_targets(self, step_id):
+        step = next((s for s in self.steps if s["id"] == step_id), None)
+        if step is None:
+            return
+        if not step["click_targets"]:
+            return
+            
+        selected_points = []
+        remaining_points = []
+        
+        for pt in step["click_targets"]:
+            chk_var = pt.get("_selected_for_del")
+            if chk_var and chk_var.get():
+                selected_points.append(pt)
+            else:
+                remaining_points.append(pt)
+                
+        if not selected_points:
+            messagebox.showinfo("ข้อมูล", "กรุณาเลือกจุดคลิกที่ต้องการลบอย่างน้อย 1 จุด")
+            return
+            
+        if not messagebox.askyesno("ยืนยัน", f"คุณต้องการลบจุดคลิกที่เลือกทั้งหมด {len(selected_points)} จุดใช่หรือไม่?"):
+            return
+            
+        step["click_targets"] = remaining_points
+        self._rebuild_click_targets_ui(step)
+        
+        idx = self.steps.index(step) + 1
+        self.add_log(f"[-] ขั้นตอนที่ {idx}: ลบจุดคลิกที่เลือก {len(selected_points)} จุดเรียบร้อยแล้ว")
 
     def open_delete_multiple_steps_dialog(self):
         if not self.steps:
