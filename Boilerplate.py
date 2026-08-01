@@ -51,21 +51,25 @@ def nms(boxes, overlap_thresh=0.4):
         
     return keep
 
-# Set customtkinter appearance and dark mode
-ctk.set_appearance_mode("dark")
-ctk.set_default_color_theme("dark-blue")
+# Set customtkinter appearance and light mode for blue & white theme
+ctk.set_appearance_mode("light")
+ctk.set_default_color_theme("blue")
 
-# Theme Colors (Sleek Obsidian)
-BG_COLOR = "#0F0F11"        # Off-black / Obsidian base
-CARD_BG = "#1A1A1E"         # Warm slate dark gray card
-ACCENT_ORANGE = "#FF6B00"   # Vibrant neon orange
-ACCENT_HOVER = "#E05E00"    # Hover orange
-TEXT_MUTED = "#9A9A9F"      # Slate gray muted text
-STATUS_ACTIVE = "#00E676"   # Neon green
-STATUS_IDLE = "#FF1744"     # Bright red
-DELETE_RED = "#D01030"      # Crimson red for deletes
-DELETE_HOVER = "#A00820"
-POINT_TAG_COLOR = "#1F2D3D" # Dark blue-gray for point tags
+# Theme Colors (Premium Modern Slate Blue & White)
+BG_COLOR = "#F8FAFC"        # Slate 50 - Very clean, light blue-gray background
+CARD_BG = "#FFFFFF"         # Pure white card background
+HEADER_BG = "#1E3A8A"       # Premium Slate/Navy blue header banner
+ACCENT_ORANGE = "#3B82F6"   # Soft Slate Blue accent (Tailwind Blue 500)
+ACCENT_HOVER = "#2563EB"    # Blue 600
+TEXT_MUTED = "#64748B"      # Slate 500 - Muted text
+STATUS_ACTIVE = "#10B981"   # Emerald 500
+STATUS_IDLE = "#EF4444"     # Red 500
+DELETE_RED = "#EF4444"      # Red 500
+DELETE_HOVER = "#DC2626"    # Red 600
+POINT_TAG_COLOR = "#E2E8F0" # Slate 200
+
+# Adaptive Text Color
+TEXT_COLOR = ("#1E293B", "#FFFFFF")
 
 class CoordinatePicker:
     def __init__(self, parent, callback):
@@ -184,6 +188,52 @@ class RegionPicker:
         self.parent.deiconify()  # Restore parent
 
 
+class RegionViewer:
+    def __init__(self, parent, x, y, w, h):
+        self.parent = parent
+        
+        # Hide parent main window
+        self.parent.withdraw()
+        
+        # Create full-screen translucent overlay
+        self.overlay = tk.Toplevel()
+        self.overlay.attributes("-fullscreen", True)
+        self.overlay.attributes("-alpha", 0.35)
+        self.overlay.attributes("-topmost", True)
+        self.overlay.config(cursor="arrow")
+        self.overlay.configure(bg="#000000")
+        
+        self.canvas = tk.Canvas(self.overlay, bg="#000000", highlightthickness=0)
+        self.canvas.pack(fill="both", expand=True)
+        
+        # Draw target rectangle
+        self.canvas.create_rectangle(
+            x, y, x + w, y + h, 
+            outline="#3B82F6", fill="#3B82F6", stipple="gray25", width=3
+        )
+        
+        # Instructions/Title text
+        instruction_frame = tk.Frame(self.canvas, bg="#1A1A1E", bd=2, highlightbackground="#3B82F6", highlightthickness=1)
+        instruction_frame.place(relx=0.5, rely=0.1, anchor="center")
+        
+        label = tk.Label(
+            instruction_frame, 
+            text=f" ขอบเขตที่คุณตั้งไว้: X={x}, Y={y}, กว้าง={w}, สูง={h} | คลิกเมาส์หรือกดปุ่มใดๆ เพื่อกลับสู่โปรแกรม ", 
+            fg="#FFFFFF", 
+            bg="#1A1A1E", 
+            font=("Segoe UI", 13, "bold")
+        )
+        label.pack(padx=15, pady=10)
+        
+        self.overlay.bind("<Button-1>", self.on_close)
+        self.overlay.bind("<Button-3>", self.on_close)
+        self.overlay.bind("<Key>", self.on_close)
+        
+    def on_close(self, event):
+        self.overlay.destroy()
+        self.parent.deiconify()
+
+
 class ScreenCapturePicker:
     def __init__(self, parent, callback):
         self.parent = parent
@@ -273,7 +323,92 @@ class ScreenCapturePicker:
         self.callback(None)
 
 
+class CTkToolTip:
+    """Sleek, modern floating tooltip window helper for CustomTkinter widgets"""
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tip_window = None
+        self.id = None
+        
+        self.widget.bind("<Enter>", self.enter)
+        self.widget.bind("<Leave>", self.leave)
+        
+    def enter(self, event=None):
+        self.schedule()
+        
+    def leave(self, event=None):
+        self.unschedule()
+        self.hide_tip()
+        
+    def schedule(self):
+        self.unschedule()
+        self.id = self.widget.after(200, self.show_tip) # 200ms delay for snappiness
+        
+    def unschedule(self):
+        if self.id:
+            self.widget.after_cancel(self.id)
+            self.id = None
+            
+    def show_tip(self, event=None):
+        if self.tip_window or not self.text:
+            return
+        
+        # Position tooltip slightly to the left of the button to prevent overlap
+        x = self.widget.winfo_rootx() - 170
+        y = self.widget.winfo_rooty() + 2
+        
+        self.tip_window = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(True)
+        tw.wm_geometry(f"+{x}+{y}")
+        
+        # Premium dark mode style tooltip for high contrast
+        bg_color = "#0F172A" # slate-900
+        fg_color = "#F8FAFC" # slate-50
+        border_color = "#F97316" # accent orange highlight
+        
+        label = tk.Label(
+            tw, 
+            text=self.text, 
+            justify="left",
+            background=bg_color, 
+            foreground=fg_color, 
+            relief="solid", 
+            borderwidth=1,
+            highlightcolor=border_color,
+            font=("Segoe UI", 9, "bold"),
+            padx=10,
+            pady=4
+        )
+        label.pack()
+        
+    def hide_tip(self):
+        tw = self.tip_window
+        self.tip_window = None
+        if tw:
+            tw.destroy()
+
 class FreecameAutoApp(ctk.CTk):
+    def flash_card_border(self, card, count=0):
+        if not card.winfo_exists():
+            return
+        colors = ["#3B82F6", "#60A5FA", "#93C5FD", "#BFDBFE", "#DBEAFE", "#F8FAFC"]
+        if count < len(colors):
+            card.configure(border_color=colors[count], border_width=2)
+            self.after(55, lambda: self.flash_card_border(card, count + 1))
+        else:
+            card.configure(border_width=0)
+
+    def flash_point_row(self, row_frame, count=0):
+        if not row_frame.winfo_exists():
+            return
+        colors = ["#3B82F6", "#60A5FA", "#93C5FD", "#E2E8F0", POINT_TAG_COLOR]
+        if count < len(colors):
+            row_frame.configure(fg_color=colors[count])
+            self.after(65, lambda: self.flash_point_row(row_frame, count + 1))
+        else:
+            row_frame.configure(fg_color=POINT_TAG_COLOR)
+
     def __init__(self):
         super().__init__()
         
@@ -300,6 +435,9 @@ class FreecameAutoApp(ctk.CTk):
             "counting_history": {}        # template_filename -> list of counts
         }
         
+        # Sidebar Toggle State
+        self.show_jump_sidebar = True
+
         # Initialize UI Components
         self.setup_ui()
         
@@ -315,11 +453,20 @@ class FreecameAutoApp(ctk.CTk):
         # Start log polling loop
         self.poll_logs()
 
+    def add_step_from_active_tab(self):
+        active_tab = self.tabview.get()
+        if active_tab == "🤖 ตั้งค่าบอตปกติ":
+            self.add_step("บอตปกติ")
+        elif active_tab == "🔍 นับวัตถุ & OCR":
+            self.add_step("นับวัตถุ")
+        else:
+            self.add_step("บอตปกติ")
+
     def register_shortcuts(self):
         """Register all keyboard shortcuts for the main window."""
         # Ctrl+N → เพิ่มขั้นตอนใหม่
-        self.bind_all("<Control-n>", lambda e: self.add_step())
-        self.bind_all("<Control-N>", lambda e: self.add_step())
+        self.bind_all("<Control-n>", lambda e: self.add_step_from_active_tab())
+        self.bind_all("<Control-N>", lambda e: self.add_step_from_active_tab())
 
         # Ctrl+S → บันทึก
         self.bind_all("<Control-s>", lambda e: self.save_config())
@@ -336,11 +483,11 @@ class FreecameAutoApp(ctk.CTk):
         self.bind_all("<Control-t>", lambda e: self.turbo_mode_var.set(not self.turbo_mode_var.get()))
         self.bind_all("<Control-T>", lambda e: self.turbo_mode_var.set(not self.turbo_mode_var.get()))
 
-        self.add_log("[★] Shortcuts: Ctrl+N=เพิ่ม  Ctrl+S=บันทึก  Ctrl+O=โหลด  F5=เริ่ม/หยุด  Ctrl+T=Turbo  ESC=หยุดฉุกเฉิน")
+        self.add_log("[★] Shortcuts: Ctrl+N=เพิ่มขั้นตอนตามแท็บปัจจุบัน  Ctrl+S=บันทึก  Ctrl+O=โหลด  F5=เริ่ม/หยุด  Ctrl+T=Turbo  ESC=หยุดฉุกเฉิน")
 
     def setup_ui(self):
         # --- HEADER BANNER ---
-        header_frame = ctk.CTkFrame(self, fg_color=CARD_BG, corner_radius=10, height=80)
+        header_frame = ctk.CTkFrame(self, fg_color=HEADER_BG, corner_radius=10, height=80)
         header_frame.pack(fill="x", padx=20, pady=(20, 10))
         header_frame.pack_propagate(False)
         
@@ -365,85 +512,63 @@ class FreecameAutoApp(ctk.CTk):
             height=28
         )
         self.status_badge.pack(side="right", padx=20)
-        
-        # --- TAB VIEW FOR MAIN NAVIGATION ---
-        self.tabview = ctk.CTkTabview(
-            self,
-            segmented_button_selected_color=ACCENT_ORANGE,
-            segmented_button_selected_hover_color=ACCENT_HOVER,
-            segmented_button_unselected_color="#252530",
-            text_color="#FFFFFF"
-        )
-        self.tabview.pack(fill="both", expand=True, padx=20, pady=(5, 10))
-        
-        # Add Tabs
-        self.tab_bot = self.tabview.add("🤖 ควบคุมและตั้งค่าบอต")
-        self.tab_analytics = self.tabview.add("📊 แดชบอร์ดวิเคราะห์ผล")
-        
+
         # =========================================================================
-        # TAB 1: BOT SETUP & CONTROL
+        # GLOBAL TOOLBAR & CONTROLS (Always Visible)
         # =========================================================================
-        
-        # --- ACTION TOOLBAR (ADD STEP, SAVE, LOAD & TURBO) ---
-        toolbar_frame = ctk.CTkFrame(self.tab_bot, fg_color="transparent")
-        toolbar_frame.pack(fill="x", padx=10, pady=5)
-        
-        self.add_step_btn = ctk.CTkButton(
-            toolbar_frame,
-            text="+ เพิ่มขั้นตอน  [Ctrl+N]",
-            fg_color=ACCENT_ORANGE,
-            hover_color=ACCENT_HOVER,
-            text_color="#FFFFFF",
-            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
-            command=self.add_step,
-            height=36
-        )
-        self.add_step_btn.pack(side="left", padx=(0, 6))
+        global_toolbar = ctk.CTkFrame(self, fg_color="transparent")
+        global_toolbar.pack(fill="x", padx=20, pady=(0, 5))
+
+        # Save/Load/Turbo buttons on the left
+        left_controls = ctk.CTkFrame(global_toolbar, fg_color="transparent")
+        left_controls.pack(side="left")
 
         # Save Config Button
         self.save_btn = ctk.CTkButton(
-            toolbar_frame,
-            text="💾 บันทึก  [Ctrl+S]",
-            fg_color="#1E3A5F",
-            hover_color="#16304F",
-            text_color="#5DBBFF",
-            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            left_controls,
+            corner_radius=8,
+            text="💾 บันทึก [Ctrl+S]",
+            fg_color=("#E2E8F0", "#1E293B"),
+            hover_color=("#CBD5E1", "#334155"),
+            text_color=("#1E293B", "#F8FAFC"),
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
             command=self.save_config,
-            height=36,
-            width=115
+            height=30,
+            width=100
         )
-        self.save_btn.pack(side="left", padx=(0, 4))
+        self.save_btn.pack(side="left", padx=2)
 
         # Load Config Button
         self.load_btn = ctk.CTkButton(
-            toolbar_frame,
-            text="📂 โหลด  [Ctrl+O]",
-            fg_color="#1E3A5F",
-            hover_color="#16304F",
-            text_color="#5DBBFF",
-            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            left_controls,
+            corner_radius=8,
+            text="📂 โหลด [Ctrl+O]",
+            fg_color=("#E2E8F0", "#1E293B"),
+            hover_color=("#CBD5E1", "#334155"),
+            text_color=("#1E293B", "#F8FAFC"),
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
             command=self.load_config,
-            height=36,
-            width=115
+            height=30,
+            width=100
         )
-        self.load_btn.pack(side="left", padx=(0, 4))
+        self.load_btn.pack(side="left", padx=2)
 
-        # Turbo switch (with shortcut hint)
+        # Turbo switch
         self.turbo_switch = ctk.CTkSwitch(
-            toolbar_frame,
-            text="Turbo  [Ctrl+T]",
+            left_controls,
+            text="Turbo [Ctrl+T]",
             variable=self.turbo_mode_var,
             progress_color=ACCENT_ORANGE,
             button_color=ACCENT_ORANGE,
             button_hover_color=ACCENT_HOVER,
-            text_color="#FFFFFF",
-            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold")
+            text_color=TEXT_COLOR,
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold")
         )
-        self.turbo_switch.pack(side="right", padx=10)
+        self.turbo_switch.pack(side="left", padx=10)
 
-        # --- SHORTCUT HINT BAR ---
-        hint_frame = ctk.CTkFrame(self.tab_bot, fg_color="#13131A", corner_radius=6, height=28)
-        hint_frame.pack(fill="x", padx=10, pady=(0, 6))
+        # Shortcut hints bar (Left-aligned container on the right)
+        hint_frame = ctk.CTkFrame(global_toolbar, fg_color=("#E2E8F0", "#13131A"), corner_radius=6, height=28)
+        hint_frame.pack(side="right", fill="y", padx=5)
         hint_frame.pack_propagate(False)
 
         hints = [
@@ -455,12 +580,11 @@ class FreecameAutoApp(ctk.CTk):
             ("ESC", "หยุดฉุกเฉิน"),
         ]
 
-        # Render hint chips inline
         hints_inner = ctk.CTkFrame(hint_frame, fg_color="transparent")
-        hints_inner.place(relx=0.5, rely=0.5, anchor="center")
+        hints_inner.pack(side="left", padx=10, pady=2)
 
         for key, desc in hints:
-            chip = ctk.CTkFrame(hints_inner, fg_color="#252530", corner_radius=4)
+            chip = ctk.CTkFrame(hints_inner, fg_color=("#F1F5F9", "#252530"), corner_radius=4)
             chip.pack(side="left", padx=4)
             ctk.CTkLabel(
                 chip,
@@ -474,27 +598,20 @@ class FreecameAutoApp(ctk.CTk):
                 font=ctk.CTkFont(family="Segoe UI", size=10),
                 text_color=TEXT_MUTED
             ).pack(side="left", padx=(0, 5), pady=2)
-        
-        # --- MAIN SCROLL CONTAINER FOR STEPS ---
-        self.steps_scroll = ctk.CTkScrollableFrame(
-            self.tab_bot, 
-            fg_color="transparent", 
-            scrollbar_button_color=CARD_BG,
-            height=300
-        )
-        self.steps_scroll.pack(fill="both", expand=True, padx=10, pady=5)
-        
-        # --- BOTTOM LOGS CONTAINER ---
-        log_card = ctk.CTkFrame(self.tab_bot, fg_color=CARD_BG, corner_radius=8, height=120)
-        log_card.pack(fill="x", padx=10, pady=5)
+
+        # =========================================================================
+        # GLOBAL LOGS & CONTROL PANEL (Always Visible at the Bottom)
+        # =========================================================================
+        log_card = ctk.CTkFrame(self, fg_color=CARD_BG, corner_radius=8, height=110)
+        log_card.pack(side="bottom", fill="x", padx=20, pady=(5, 10))
         log_card.pack_propagate(False)
         
         ctk.CTkLabel(
             log_card, 
             text="ประวัติการทำงาน (Console Log)", 
-            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             text_color=ACCENT_ORANGE
-        ).pack(anchor="w", padx=15, pady=(4, 2))
+        ).pack(anchor="w", padx=15, pady=(4, 1))
         
         self.log_textbox = ctk.CTkTextbox(
             log_card, 
@@ -502,24 +619,137 @@ class FreecameAutoApp(ctk.CTk):
             text_color="#E0E0E5", 
             font=ctk.CTkFont(family="Consolas", size=11),
         )
-        self.log_textbox.pack(fill="both", expand=True, padx=15, pady=(0, 8))
+        self.log_textbox.pack(fill="both", expand=True, padx=15, pady=(0, 6))
         self.log_textbox.configure(state="disabled")
-        
-        # --- BOTTOM ACTION PANEL ---
-        actions_frame = ctk.CTkFrame(self.tab_bot, fg_color="transparent")
-        actions_frame.pack(fill="x", padx=10, pady=(5, 10))
+
+        actions_frame = ctk.CTkFrame(self, fg_color="transparent")
+        actions_frame.pack(side="bottom", fill="x", padx=20, pady=(0, 5))
         
         self.toggle_bot_btn = ctk.CTkButton(
             actions_frame,
+            corner_radius=8,
             text="▶  เริ่มระบบบอต  (START BOT)  [F5]",
-            fg_color=ACCENT_ORANGE,
-            hover_color=ACCENT_HOVER,
-            text_color="#FFFFFF",
-            height=45,
-            font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"),
+            fg_color=ACCENT_ORANGE, hover_color=ACCENT_HOVER, text_color="#FFFFFF",
+            height=40,
+            font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"),
             command=self.toggle_bot
         )
         self.toggle_bot_btn.pack(fill="x")
+
+        # --- TAB VIEW FOR MAIN NAVIGATION (In the Center) ---
+        # Global layout container to hold Tabview and the Right Sidebar side-by-side
+        center_layout_frame = ctk.CTkFrame(self, fg_color="transparent")
+        center_layout_frame.pack(fill="both", expand=True, padx=20, pady=5)
+
+        self.tabview = ctk.CTkTabview(
+            center_layout_frame,
+            segmented_button_selected_color=ACCENT_ORANGE,
+            segmented_button_selected_hover_color=ACCENT_HOVER,
+            segmented_button_unselected_color=("#E2E8F0", "#252530"),
+            text_color=TEXT_COLOR,
+            fg_color=BG_COLOR
+        )
+        self.tabview.pack(side="left", fill="both", expand=True)
+        
+        # Single unified global Jump Sidebar on the right side of the entire window
+        self.jump_sidebar = ctk.CTkFrame(center_layout_frame, fg_color="transparent", width=40)
+        self.jump_sidebar.pack(side="right", fill="y", padx=(10, 0))
+        
+        # Add Tabs
+        self.tab_bot = self.tabview.add("🤖 ตั้งค่าบอตปกติ")
+        self.tab_detection = self.tabview.add("🔍 นับวัตถุ & OCR")
+        self.tab_analytics = self.tabview.add("📊 แดชบอร์ดวิเคราะห์ผล")
+        
+        # =========================================================================
+        # TAB 1: NORMAL BOT SETUP
+        # =========================================================================
+        normal_toolbar = ctk.CTkFrame(self.tab_bot, fg_color="transparent")
+        normal_toolbar.pack(fill="x", padx=10, pady=5)
+        
+        self.add_step_btn = ctk.CTkButton(
+            normal_toolbar,
+            corner_radius=8,
+            text="+ เพิ่มขั้นตอนปกติ  [Ctrl+N]",
+            fg_color=ACCENT_ORANGE, hover_color=ACCENT_HOVER, text_color="#FFFFFF",
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            command=lambda: self.add_step("บอตปกติ"),
+            height=34
+        )
+        self.add_step_btn.pack(side="left", padx=0)
+        
+        self.btn_toggle_sidebar_normal = ctk.CTkButton(
+            normal_toolbar,
+            corner_radius=8,
+            text="📍 ซ่อนแถบทางลัด",
+            fg_color=("#E2E8F0", "#1E293B"),
+            hover_color=ACCENT_ORANGE,
+            text_color=TEXT_COLOR,
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            command=self.toggle_jump_sidebars,
+            width=110,
+            height=34
+        )
+        self.btn_toggle_sidebar_normal.pack(side="right", padx=0)
+
+        self.steps_scroll_normal = ctk.CTkScrollableFrame(
+            self.tab_bot, 
+            fg_color=BG_COLOR, 
+            scrollbar_button_color=CARD_BG,
+            height=300
+        )
+        self.steps_scroll_normal.pack(fill="both", expand=True, padx=10, pady=5)
+        self.apply_smooth_scroll(self.steps_scroll_normal)
+
+        # =========================================================================
+        # TAB 2: DETECTION SETUP (OBJECT COUNTING & OCR)
+        # =========================================================================
+        detection_toolbar = ctk.CTkFrame(self.tab_detection, fg_color="transparent")
+        detection_toolbar.pack(fill="x", padx=10, pady=5)
+        
+        self.add_counting_btn = ctk.CTkButton(
+            detection_toolbar,
+            corner_radius=8,
+            text="+ เพิ่มงานนับวัตถุ",
+            fg_color=ACCENT_ORANGE, hover_color=ACCENT_HOVER, text_color="#FFFFFF",
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            command=lambda: self.add_step("นับวัตถุ"),
+            height=34
+        )
+        self.add_counting_btn.pack(side="left", padx=(0, 6))
+
+        self.add_ocr_btn = ctk.CTkButton(
+            detection_toolbar,
+            corner_radius=8,
+            text="+ เพิ่มงานบวกเลข OCR",
+            fg_color=ACCENT_ORANGE, hover_color=ACCENT_HOVER, text_color="#FFFFFF",
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            command=lambda: self.add_step("บวกเลข OCR"),
+            height=34
+        )
+        self.add_ocr_btn.pack(side="left", padx=0)
+        
+        self.btn_toggle_sidebar_detection = ctk.CTkButton(
+            detection_toolbar,
+            corner_radius=8,
+            text="📍 ซ่อนแถบทางลัด",
+            fg_color=("#E2E8F0", "#1E293B"),
+            hover_color=ACCENT_ORANGE,
+            text_color=TEXT_COLOR,
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            command=self.toggle_jump_sidebars,
+            width=110,
+            height=34
+        )
+        self.btn_toggle_sidebar_detection.pack(side="right", padx=0)
+
+        self.steps_scroll_detection = ctk.CTkScrollableFrame(
+            self.tab_detection, 
+            fg_color=BG_COLOR, 
+            scrollbar_button_color=CARD_BG,
+            height=300
+        )
+        self.steps_scroll_detection.pack(fill="both", expand=True, padx=10, pady=5)
+        self.apply_smooth_scroll(self.steps_scroll_detection)
         
         # =========================================================================
         # TAB 2: ANALYTICS DASHBOARD
@@ -540,7 +770,7 @@ class FreecameAutoApp(ctk.CTk):
         metrics_frame.columnconfigure((0, 1, 2), weight=1, uniform="equal")
         
         # Card 1: Total Scan Cycles
-        card1 = ctk.CTkFrame(metrics_frame, fg_color=CARD_BG, corner_radius=8, border_color=ACCENT_ORANGE, border_width=1)
+        card1 = ctk.CTkFrame(metrics_frame, fg_color=CARD_BG, corner_radius=8, border_color=("#CBD5E1", "#1E293B"), border_width=1)
         card1.grid(row=0, column=0, padx=5, sticky="nsew")
         ctk.CTkLabel(card1, text="รอบสแกนสะสม (Total Cycles)", font=ctk.CTkFont(size=11), text_color=TEXT_MUTED).pack(anchor="w", padx=15, pady=(8, 2))
         self.lbl_metric_cycles = ctk.CTkLabel(card1, text="0", font=ctk.CTkFont(family="Consolas", size=24, weight="bold"), text_color=ACCENT_ORANGE)
@@ -550,11 +780,11 @@ class FreecameAutoApp(ctk.CTk):
         card2 = ctk.CTkFrame(metrics_frame, fg_color=CARD_BG, corner_radius=8, border_color="#1E3A5F", border_width=1)
         card2.grid(row=0, column=1, padx=5, sticky="nsew")
         ctk.CTkLabel(card2, text="ระยะเวลาการทำงาน (Active Time)", font=ctk.CTkFont(size=11), text_color=TEXT_MUTED).pack(anchor="w", padx=15, pady=(8, 2))
-        self.lbl_metric_uptime = ctk.CTkLabel(card2, text="00:00:00", font=ctk.CTkFont(family="Consolas", size=24, weight="bold"), text_color="#5DBBFF")
+        self.lbl_metric_uptime = ctk.CTkLabel(card2, text="00:00:00", font=ctk.CTkFont(family="Consolas", size=24, weight="bold"), text_color=("#1E293B", "#F8FAFC"))
         self.lbl_metric_uptime.pack(anchor="w", padx=15, pady=(0, 8))
         
         # Card 3: Total Triggers
-        card3 = ctk.CTkFrame(metrics_frame, fg_color=CARD_BG, corner_radius=8, border_color="#00E676", border_width=1)
+        card3 = ctk.CTkFrame(metrics_frame, fg_color=CARD_BG, corner_radius=8, border_color=("#CBD5E1", "#1E293B"), border_width=1)
         card3.grid(row=0, column=2, padx=5, sticky="nsew")
         ctk.CTkLabel(card3, text="รวมการตรวจพบสำเร็จ (Triggers)", font=ctk.CTkFont(size=11), text_color=TEXT_MUTED).pack(anchor="w", padx=15, pady=(8, 2))
         self.lbl_metric_triggers = ctk.CTkLabel(card3, text="0 ครั้ง", font=ctk.CTkFont(family="Consolas", size=24, weight="bold"), text_color="#00E676")
@@ -577,7 +807,7 @@ class FreecameAutoApp(ctk.CTk):
         
         self.chart_canvas = tk.Canvas(
             self.chart_container, 
-            bg="#0F0F11", 
+            bg="#F8FAFC", 
             highlightthickness=0
         )
         self.chart_canvas.pack(fill="both", expand=True, padx=15, pady=(0, 15))
@@ -592,7 +822,7 @@ class FreecameAutoApp(ctk.CTk):
             self.stats_summary_panel, 
             text="📋 รายละเอียดผลลัพธ์ล่าสุด", 
             font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
-            text_color="#FFFFFF"
+            text_color=TEXT_COLOR
         ).pack(anchor="w", padx=15, pady=(10, 5))
         
         self.stats_scroll_frame = ctk.CTkScrollableFrame(
@@ -608,10 +838,11 @@ class FreecameAutoApp(ctk.CTk):
         
         self.btn_export = ctk.CTkButton(
             bottom_panel,
+            corner_radius=8,
             text="📤 ส่งออกรายงาน (Export CSV)",
-            fg_color="#1E3A5F",
-            hover_color="#16304F",
-            text_color="#5DBBFF",
+            fg_color=("#E2E8F0", "#1E293B"),
+            hover_color=("#CBD5E1", "#334155"),
+            text_color=("#1E293B", "#F8FAFC"),
             font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             height=36,
             command=self.export_stats_csv
@@ -620,10 +851,11 @@ class FreecameAutoApp(ctk.CTk):
         
         self.btn_clear_stats = ctk.CTkButton(
             bottom_panel,
+            corner_radius=8,
             text="🧹 ล้างสถิติ (Clear Stats)",
             fg_color=DELETE_RED,
             hover_color=DELETE_HOVER,
-            text_color="#FFFFFF",
+            text_color=TEXT_COLOR,
             font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             height=36,
             command=self.clear_analytics
@@ -657,35 +889,25 @@ class FreecameAutoApp(ctk.CTk):
         total_triggers = sum(self.stats_data["triggers_count"].values())
         self.lbl_metric_triggers.configure(text=f"{total_triggers} ครั้ง")
         
-        # 4. Rebuild the Right Side Summary Stats list
+        # 4. Update or Build the Right Side Summary Stats list
+        valid_cards = set()
+        for step in self.steps:
+            if "stats_card" in step and step["stats_card"] and step["stats_card"].winfo_exists():
+                valid_cards.add(step["stats_card"])
+                
         for widget in self.stats_scroll_frame.winfo_children():
-            widget.destroy()
-            
-        # Render details for each step
+            if widget not in valid_cards:
+                widget.destroy()
+                
+        # Update or render details for each step
         for i, step in enumerate(self.steps):
-            step_name = f"ขั้นตอนที่ {i+1} ({step['mode']})"
+            name_val = step.get("step_name", "")
+            step_name = f"ขั้นตอนที่ {i+1} ({name_val if name_val else step['mode']})"
             
-            card_sub = ctk.CTkFrame(self.stats_scroll_frame, fg_color="#13131A", corner_radius=6)
-            card_sub.pack(fill="x", pady=4, padx=2)
-            
-            ctk.CTkLabel(
-                card_sub,
-                text=step_name,
-                font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
-                text_color=ACCENT_ORANGE
-            ).pack(anchor="w", padx=10, pady=(6, 2))
-            
-            # Show specific stats depending on mode
+            # Prepare content text depending on mode
             if step["mode"] == "บอตปกติ":
                 triggers = self.stats_data["triggers_count"].get(step["id"], 0)
-                ctk.CTkLabel(
-                    card_sub,
-                    text=f"• จำนวนการกระตุ้น (Triggers): {triggers} ครั้ง\n• ความแม่นยำเฉลี่ย: {step.get('confidence', 0.80):.2f}",
-                    font=ctk.CTkFont(size=10),
-                    text_color="#E0E0E5",
-                    justify="left"
-                ).pack(anchor="w", padx=10, pady=(0, 6))
-                
+                content_text = f"• จำนวนการกระตุ้น (Triggers): {triggers} ครั้ง\n• ความแม่นยำเฉลี่ย: {step.get('confidence', 0.80):.2f}"
             elif step["mode"] == "นับวัตถุ":
                 lbl_text = "• ภาพเป้าหมายตรวจนับ:\n"
                 if not step.get("counting_targets", []):
@@ -696,27 +918,53 @@ class FreecameAutoApp(ctk.CTk):
                         acc = t.get('accum_count', 0)
                         last_c = t.get('last_count', 0)
                         lbl_text += f"  - {fname}: สะสม {acc} ชิ้น (รอบนี้: {last_c})\n"
-                
-                ctk.CTkLabel(
-                    card_sub,
-                    text=lbl_text.strip(),
-                    font=ctk.CTkFont(size=10),
-                    text_color="#E0E0E5",
-                    justify="left"
-                ).pack(anchor="w", padx=10, pady=(0, 6))
-                
+                content_text = lbl_text.strip()
             elif step["mode"] == "บวกเลข OCR":
                 val = step.get("last_ocr_sum", 0.0)
                 txt = step.get("last_ocr_text", "").replace("\n", " ").strip()
                 if len(txt) > 25:
                     txt = txt[:25] + "..."
-                ctk.CTkLabel(
+                content_text = f"• ผลรวมตัวเลขล่าสุด: {val:.2f}\n• ข้อความดิบ: \"{txt}\""
+            else:
+                content_text = ""
+                
+            # Check if card already exists in cache
+            if ("stats_card" in step and step["stats_card"] and 
+                step["stats_card"].winfo_exists() and 
+                "stats_label" in step and step["stats_label"] and 
+                step["stats_label"].winfo_exists() and
+                "stats_title" in step and step["stats_title"] and 
+                step["stats_title"].winfo_exists()):
+                
+                # Direct configure values
+                step["stats_title"].configure(text=step_name)
+                step["stats_label"].configure(text=content_text)
+                step["stats_card"].pack(fill="x", pady=4, padx=2)
+            else:
+                # Create new widgets and store references
+                card_sub = ctk.CTkFrame(self.stats_scroll_frame, fg_color=("#E2E8F0", "#13131A"), corner_radius=6)
+                card_sub.pack(fill="x", pady=4, padx=2)
+                
+                title_lbl = ctk.CTkLabel(
                     card_sub,
-                    text=f"• ผลรวมตัวเลขล่าสุด: {val:.2f}\n• ข้อความดิบ: \"{txt}\"",
+                    text=step_name,
+                    font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+                    text_color=ACCENT_ORANGE
+                )
+                title_lbl.pack(anchor="w", padx=10, pady=(6, 2))
+                
+                label_val = ctk.CTkLabel(
+                    card_sub,
+                    text=content_text,
                     font=ctk.CTkFont(size=10),
-                    text_color="#E0E0E5",
+                    text_color=("#1E293B", "#E0E0E5"),
                     justify="left"
-                ).pack(anchor="w", padx=10, pady=(0, 6))
+                )
+                label_val.pack(anchor="w", padx=10, pady=(0, 6))
+                
+                step["stats_card"] = card_sub
+                step["stats_title"] = title_lbl
+                step["stats_label"] = label_val
                 
         # 5. Redraw the custom chart
         self.draw_chart()
@@ -729,9 +977,11 @@ class FreecameAutoApp(ctk.CTk):
             w, h = 480, 240
             
         # Draw grid
+        is_dark = ctk.get_appearance_mode() == "Dark"
+        grid_color = "#222228" if is_dark else "#E2E8F0"
         for i in range(1, 5):
             y_grid = h - (i * (h // 5))
-            self.chart_canvas.create_line(0, y_grid, w, y_grid, fill="#222228", width=1)
+            self.chart_canvas.create_line(0, y_grid, w, y_grid, fill=grid_color, width=1)
             
         # Retrieve history to plot
         history = self.stats_data.get("ocr_sum_history", [])
@@ -851,9 +1101,16 @@ class FreecameAutoApp(ctk.CTk):
             
         self.add_log(f"[*] ขั้นตอนที่ {self.steps.index(step) + 1}: เปลี่ยนโหมดเป็น {mode_val}")
 
-    def add_step(self):
+    def add_step(self, mode="บอตปกติ"):
         step_id = str(random.randint(100000, 999999))
         
+        if mode == "บอตปกติ":
+            scroll_container = self.steps_scroll_normal
+        elif mode == "นับวัตถุ" or mode == "บวกเลข OCR":
+            scroll_container = self.steps_scroll_detection
+        else:
+            scroll_container = self.steps_scroll_normal
+
         step_data = {
             "id": step_id,
             "mode": "บอตปกติ",
@@ -894,10 +1151,20 @@ class FreecameAutoApp(ctk.CTk):
             "ocr_region_label": None,
             "lbl_ocr_result_sum": None,
             "lbl_ocr_result_text": None,
+            
+            # Dashboard Stats Cache
+            "stats_card": None,
+            "stats_title": None,
+            "stats_label": None,
+            
+            # Step Name
+            "step_name": "",
+            "step_name_entry": None,
         }
         
-        card = ctk.CTkFrame(self.steps_scroll, fg_color=CARD_BG, corner_radius=8)
+        card = ctk.CTkFrame(scroll_container, fg_color=CARD_BG, corner_radius=8)
         card.pack(fill="x", pady=8, padx=5)
+        self.flash_card_border(card)
         step_data["card_frame"] = card
         
         header_row = ctk.CTkFrame(card, fg_color="transparent")
@@ -912,6 +1179,34 @@ class FreecameAutoApp(ctk.CTk):
         title_lbl.pack(side="left")
         step_data["title_label"] = title_lbl
         
+        name_lbl = ctk.CTkLabel(
+            header_row,
+            text=" | ชื่อ:",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            text_color=TEXT_MUTED
+        )
+        name_lbl.pack(side="left", padx=(5, 2))
+        
+        step_name_entry = ctk.CTkEntry(
+            header_row,
+            placeholder_text="ตั้งชื่อขั้นตอน...",
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            fg_color=("#FFFFFF", "#0F0F11"),
+            text_color=("#0F172A", "#FFFFFF"),
+            border_color=("#CBD5E1", "#1E293B"),
+            border_width=1,
+            height=24,
+            width=180
+        )
+        step_name_entry.pack(side="left", padx=2)
+        
+        def on_name_keypress(event, s_id=step_id, entry=step_name_entry):
+            self.on_step_name_change(s_id, entry.get())
+            
+        step_name_entry.bind("<KeyRelease>", on_name_keypress)
+        step_name_entry.bind("<FocusOut>", on_name_keypress)
+        step_data["step_name_entry"] = step_name_entry
+        
         header_actions = ctk.CTkFrame(header_row, fg_color="transparent")
         header_actions.pack(side="right")
 
@@ -920,7 +1215,7 @@ class FreecameAutoApp(ctk.CTk):
             header_actions,
             text="ย้ายไปลำดับที่:",
             font=ctk.CTkFont(family="Segoe UI", size=11),
-            text_color="#FFFFFF"
+            text_color=TEXT_COLOR
         )
         move_lbl.pack(side="left", padx=(0, 2))
 
@@ -929,8 +1224,9 @@ class FreecameAutoApp(ctk.CTk):
             width=35,
             height=24,
             font=ctk.CTkFont(family="Consolas", size=11, weight="bold"),
-            fg_color="#0F0F11",
-            border_color=ACCENT_ORANGE,
+            fg_color=("#FFFFFF", "#1E293B"),
+            text_color=("#0F172A", "#F8FAFC"),
+            border_color=("#CBD5E1", "#1E293B"),
             border_width=1,
             justify="center"
         )
@@ -943,10 +1239,11 @@ class FreecameAutoApp(ctk.CTk):
 
         move_up_btn = ctk.CTkButton(
             header_actions,
+            corner_radius=8,
             text="▲ เลื่อนขึ้น",
-            fg_color="#1E3A5F",
-            hover_color="#16304F",
-            text_color="#5DBBFF",
+            fg_color=("#E2E8F0", "#1E293B"),
+            hover_color=("#CBD5E1", "#334155"),
+            text_color=("#1E293B", "#F8FAFC"),
             font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
             width=65,
             height=24,
@@ -956,10 +1253,11 @@ class FreecameAutoApp(ctk.CTk):
 
         move_down_btn = ctk.CTkButton(
             header_actions,
+            corner_radius=8,
             text="▼ เลื่อนลง",
-            fg_color="#1E3A5F",
-            hover_color="#16304F",
-            text_color="#5DBBFF",
+            fg_color=("#E2E8F0", "#1E293B"),
+            hover_color=("#CBD5E1", "#334155"),
+            text_color=("#1E293B", "#F8FAFC"),
             font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
             width=65,
             height=24,
@@ -969,33 +1267,17 @@ class FreecameAutoApp(ctk.CTk):
 
         delete_btn = ctk.CTkButton(
             header_actions,
+            corner_radius=8,
             text="ลบขั้นตอนนี้",
             fg_color=DELETE_RED,
             hover_color=DELETE_HOVER,
-            text_color="#FFFFFF",
+            text_color=TEXT_COLOR,
             font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
             width=80,
             height=24,
             command=lambda sid=step_id: self.delete_step(sid)
         )
         delete_btn.pack(side="left", padx=(10, 0))
-        
-        # --- MODE SELECTOR ROW ---
-        mode_row = ctk.CTkFrame(card, fg_color="transparent")
-        mode_row.pack(fill="x", padx=15, pady=(2, 6))
-        ctk.CTkLabel(mode_row, text="โหมดขั้นตอนทำงาน:", font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"), text_color="#E0E0E5").pack(side="left")
-        
-        mode_selector = ctk.CTkSegmentedButton(
-            mode_row,
-            values=["บอตปกติ", "นับวัตถุ", "บวกเลข OCR"],
-            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
-            selected_color=ACCENT_ORANGE,
-            selected_hover_color=ACCENT_HOVER,
-            height=24,
-            command=lambda val, sid=step_id: self.change_step_mode(sid, val)
-        )
-        mode_selector.set("บอตปกติ")
-        mode_selector.pack(side="right")
         
         body_frame = ctk.CTkFrame(card, fg_color="transparent")
         body_frame.pack(fill="x", padx=15, pady=5)
@@ -1014,7 +1296,7 @@ class FreecameAutoApp(ctk.CTk):
             left_col, 
             text="1. เงื่อนไขตรวจจับ (Trigger Image)", 
             font=ctk.CTkFont(size=12, weight="bold"),
-            text_color="#FFFFFF"
+            text_color=TEXT_COLOR
         ).pack(anchor="w", pady=(0, 3))
         
         img_lbl = ctk.CTkLabel(
@@ -1032,7 +1314,7 @@ class FreecameAutoApp(ctk.CTk):
             text="ไม่มีภาพตัวอย่าง",
             font=ctk.CTkFont(size=11),
             text_color=TEXT_MUTED,
-            fg_color="#121214",
+            fg_color=("#F1F5F9", "#121214"),
             width=150,
             height=70,
             corner_radius=4
@@ -1045,12 +1327,10 @@ class FreecameAutoApp(ctk.CTk):
 
         browse_btn = ctk.CTkButton(
             btn_frame,
+            corner_radius=8,
             text="เลือกรูปภาพ",
             fg_color="transparent",
-            border_color=ACCENT_ORANGE,
-            border_width=1.5,
-            hover_color="#30201a",
-            text_color="#FFFFFF",
+            border_color=("#CBD5E1", "#1E293B"), border_width=1.5, hover_color=("#DBEAFE", "#30201a"), text_color=ACCENT_ORANGE,
             font=ctk.CTkFont(size=11, weight="bold"),
             height=28,
             command=lambda sid=step_id: self.browse_trigger_image(sid)
@@ -1059,12 +1339,10 @@ class FreecameAutoApp(ctk.CTk):
 
         capture_btn = ctk.CTkButton(
             btn_frame,
+            corner_radius=8,
             text="แคปเจอร์รูป",
             fg_color="transparent",
-            border_color=ACCENT_ORANGE,
-            border_width=1.5,
-            hover_color="#30201a",
-            text_color="#FFFFFF",
+            border_color=("#CBD5E1", "#1E293B"), border_width=1.5, hover_color=("#DBEAFE", "#30201a"), text_color=ACCENT_ORANGE,
             font=ctk.CTkFont(size=11, weight="bold"),
             height=28,
             command=lambda sid=step_id: self.open_capture_picker(sid)
@@ -1086,27 +1364,36 @@ class FreecameAutoApp(ctk.CTk):
         
         select_region_btn = ctk.CTkButton(
             region_btn_frame,
+            corner_radius=8,
             text="เลือกขอบเขต",
             fg_color="transparent",
-            border_color=ACCENT_ORANGE,
-            border_width=1.5,
-            hover_color="#30201a",
-            text_color="#FFFFFF",
+            border_color=("#CBD5E1", "#1E293B"), border_width=1.5, hover_color=("#DBEAFE", "#30201a"), text_color=ACCENT_ORANGE,
             font=ctk.CTkFont(size=11, weight="bold"),
             height=28,
             width=80,
             command=lambda sid=step_id: self.open_region_picker(sid)
         )
         select_region_btn.pack(side="left", fill="x", expand=True, padx=(0, 2))
+
+        view_region_btn = ctk.CTkButton(
+            region_btn_frame,
+            corner_radius=8,
+            text="ดูขอบเขต",
+            fg_color="transparent",
+            border_color=("#CBD5E1", "#1E293B"), border_width=1.5, hover_color=("#DBEAFE", "#30201a"), text_color=ACCENT_ORANGE,
+            font=ctk.CTkFont(size=11, weight="bold"),
+            height=28,
+            width=65,
+            command=lambda sid=step_id: self.view_search_region(sid)
+        )
+        view_region_btn.pack(side="left", fill="x", expand=True, padx=(2, 2))
         
         clear_region_btn = ctk.CTkButton(
             region_btn_frame,
+            corner_radius=8,
             text="ล้าง",
             fg_color="transparent",
-            border_color=DELETE_RED,
-            border_width=1.5,
-            hover_color="#30151a",
-            text_color="#FFFFFF",
+            border_color=DELETE_RED, border_width=1.5, hover_color=("#FEE2E2", "#30151a"), text_color=DELETE_RED,
             font=ctk.CTkFont(size=11, weight="bold"),
             height=28,
             width=40,
@@ -1124,16 +1411,17 @@ class FreecameAutoApp(ctk.CTk):
             click_section_header, 
             text="2. จุดคลิกเป้าหมาย (Click Targets)", 
             font=ctk.CTkFont(size=12, weight="bold"),
-            text_color="#FFFFFF"
+            text_color=TEXT_COLOR
         ).pack(side="left")
         
         add_point_btn = ctk.CTkButton(
             click_section_header,
+            corner_radius=8,
             text="+ เพิ่มจุดคลิก",
             fg_color="transparent",
-            border_color=ACCENT_ORANGE,
+            border_color=("#CBD5E1", "#1E293B"),
             border_width=1.5,
-            hover_color="#30201a",
+            hover_color=("#DBEAFE", "#30201a"),
             text_color=ACCENT_ORANGE,
             font=ctk.CTkFont(size=10, weight="bold"),
             width=90,
@@ -1142,7 +1430,7 @@ class FreecameAutoApp(ctk.CTk):
         )
         add_point_btn.pack(side="right")
         
-        click_targets_frame = ctk.CTkFrame(right_col, fg_color="#121214", corner_radius=5)
+        click_targets_frame = ctk.CTkFrame(right_col, fg_color=("#F1F5F9", "#121214"), corner_radius=5)
         click_targets_frame.pack(fill="x", pady=(0, 6))
         step_data["click_targets_frame"] = click_targets_frame
         
@@ -1157,10 +1445,11 @@ class FreecameAutoApp(ctk.CTk):
         
         action_row = ctk.CTkFrame(right_col, fg_color="transparent")
         action_row.pack(fill="x", pady=(2, 6))
-        ctk.CTkLabel(action_row, text="รูปแบบการทำงาน:", font=ctk.CTkFont(size=11), text_color="#FFFFFF").pack(side="left")
+        ctk.CTkLabel(action_row, text="รูปแบบการทำงาน:", font=ctk.CTkFont(size=11), text_color=TEXT_COLOR).pack(side="left")
         
         action_selector = ctk.CTkSegmentedButton(
             action_row,
+            corner_radius=8,
             values=["คลิกเมาส์", "พิมพ์ข้อความ"],
             font=ctk.CTkFont(size=11, weight="bold"),
             selected_color=ACCENT_ORANGE,
@@ -1175,14 +1464,14 @@ class FreecameAutoApp(ctk.CTk):
         text_frame = ctk.CTkFrame(right_col, fg_color="transparent")
         step_data["text_entry_frame"] = text_frame
         
-        ctk.CTkLabel(text_frame, text="ข้อความที่ต้องการให้พิมพ์:", font=ctk.CTkFont(size=11), text_color="#FFFFFF").pack(anchor="w")
+        ctk.CTkLabel(text_frame, text="ข้อความที่ต้องการให้พิมพ์:", font=ctk.CTkFont(size=11), text_color=TEXT_COLOR).pack(anchor="w")
         text_entry = ctk.CTkEntry(
             text_frame,
             placeholder_text="กรอกข้อความที่นี่...",
             font=ctk.CTkFont(size=11),
             height=26,
             fg_color="#0F0F11",
-            border_color=ACCENT_ORANGE,
+            border_color=("#CBD5E1", "#1E293B"),
             border_width=1
         )
         text_entry.pack(fill="x", pady=2)
@@ -1201,7 +1490,7 @@ class FreecameAutoApp(ctk.CTk):
         conf_row = ctk.CTkFrame(right_col, fg_color="transparent")
         conf_row.pack(fill="x")
         step_data["conf_row"] = conf_row
-        ctk.CTkLabel(conf_row, text="ความแม่นยำ (Confidence):", font=ctk.CTkFont(size=11), text_color="#FFFFFF").pack(side="left")
+        ctk.CTkLabel(conf_row, text="ความแม่นยำ (Confidence):", font=ctk.CTkFont(size=11), text_color=TEXT_COLOR).pack(side="left")
         conf_val_lbl = ctk.CTkLabel(conf_row, text="0.80", font=ctk.CTkFont(size=11, weight="bold"), text_color=ACCENT_ORANGE)
         conf_val_lbl.pack(side="right")
         step_data["conf_val_label"] = conf_val_lbl
@@ -1223,7 +1512,7 @@ class FreecameAutoApp(ctk.CTk):
         
         delay_row = ctk.CTkFrame(right_col, fg_color="transparent")
         delay_row.pack(fill="x")
-        ctk.CTkLabel(delay_row, text="หน่วงเวลาหลังคลิก (วินาที):", font=ctk.CTkFont(size=11), text_color="#FFFFFF").pack(side="left")
+        ctk.CTkLabel(delay_row, text="หน่วงเวลาหลังคลิก (วินาที):", font=ctk.CTkFont(size=11), text_color=TEXT_COLOR).pack(side="left")
         
         delay_entry = ctk.CTkEntry(
             delay_row,
@@ -1231,7 +1520,7 @@ class FreecameAutoApp(ctk.CTk):
             height=20,
             font=ctk.CTkFont(family="Consolas", size=10, weight="bold"),
             fg_color="#0F0F11",
-            border_color=ACCENT_ORANGE,
+            border_color=("#CBD5E1", "#1E293B"),
             border_width=1,
             text_color=ACCENT_ORANGE,
             justify="center"
@@ -1270,7 +1559,7 @@ class FreecameAutoApp(ctk.CTk):
         c_left = ctk.CTkFrame(counting_ui, fg_color="transparent")
         c_left.pack(side="left", fill="both", expand=True, padx=(0, 10))
         
-        ctk.CTkLabel(c_left, text="1. ขอบเขตพื้นที่และเป้าหมาย", font=ctk.CTkFont(size=12, weight="bold"), text_color="#FFFFFF").pack(anchor="w")
+        ctk.CTkLabel(c_left, text="1. ขอบเขตพื้นที่และเป้าหมาย", font=ctk.CTkFont(size=12, weight="bold"), text_color=TEXT_COLOR).pack(anchor="w")
         
         c_region_lbl = ctk.CTkLabel(c_left, text="ขอบเขตตรวจจับ: ทั่วทั้งหน้าจอ", font=ctk.CTkFont(size=11), text_color=TEXT_MUTED, anchor="w")
         c_region_lbl.pack(anchor="w", fill="x", pady=2)
@@ -1281,27 +1570,36 @@ class FreecameAutoApp(ctk.CTk):
         
         c_select_region_btn = ctk.CTkButton(
             c_region_btn_frame,
+            corner_radius=8,
             text="เลือกขอบเขต",
             fg_color="transparent",
-            border_color=ACCENT_ORANGE,
-            border_width=1.5,
-            hover_color="#30201a",
-            text_color="#FFFFFF",
+            border_color=("#CBD5E1", "#1E293B"), border_width=1.5, hover_color=("#DBEAFE", "#30201a"), text_color=ACCENT_ORANGE,
             font=ctk.CTkFont(size=11, weight="bold"),
             height=28,
             width=80,
             command=lambda sid=step_id: self.open_region_picker(sid)
         )
         c_select_region_btn.pack(side="left", fill="x", expand=True, padx=(0, 2))
+
+        c_view_region_btn = ctk.CTkButton(
+            c_region_btn_frame,
+            corner_radius=8,
+            text="ดูขอบเขต",
+            fg_color="transparent",
+            border_color=("#CBD5E1", "#1E293B"), border_width=1.5, hover_color=("#DBEAFE", "#30201a"), text_color=ACCENT_ORANGE,
+            font=ctk.CTkFont(size=11, weight="bold"),
+            height=28,
+            width=65,
+            command=lambda sid=step_id: self.view_search_region(sid)
+        )
+        c_view_region_btn.pack(side="left", fill="x", expand=True, padx=(2, 2))
         
         c_clear_region_btn = ctk.CTkButton(
             c_region_btn_frame,
+            corner_radius=8,
             text="ล้าง",
             fg_color="transparent",
-            border_color=DELETE_RED,
-            border_width=1.5,
-            hover_color="#30151a",
-            text_color="#FFFFFF",
+            border_color=DELETE_RED, border_width=1.5, hover_color=("#FEE2E2", "#30151a"), text_color=DELETE_RED,
             font=ctk.CTkFont(size=11, weight="bold"),
             height=28,
             width=40,
@@ -1314,10 +1612,11 @@ class FreecameAutoApp(ctk.CTk):
 
         add_counting_target_btn = ctk.CTkButton(
             c_btn_frame,
+            corner_radius=8,
             text="📁 เลือกไฟล์ภาพ",
-            fg_color="#1E3A5F",
-            hover_color="#16304F",
-            text_color="#5DBBFF",
+            fg_color=("#E2E8F0", "#1E293B"),
+            hover_color=("#CBD5E1", "#334155"),
+            text_color=("#1E293B", "#F8FAFC"),
             font=ctk.CTkFont(size=11, weight="bold"),
             height=32,
             command=lambda sid=step_id: self.add_counting_target(sid)
@@ -1326,10 +1625,9 @@ class FreecameAutoApp(ctk.CTk):
 
         capture_counting_btn = ctk.CTkButton(
             c_btn_frame,
+            corner_radius=8,
             text="📸 แคปภาพนับ",
-            fg_color=ACCENT_ORANGE,
-            hover_color=ACCENT_HOVER,
-            text_color="#FFFFFF",
+            fg_color=ACCENT_ORANGE, hover_color=ACCENT_HOVER, text_color="#FFFFFF",
             font=ctk.CTkFont(size=11, weight="bold"),
             height=32,
             command=lambda sid=step_id: self.open_counting_capture_picker(sid)
@@ -1342,16 +1640,17 @@ class FreecameAutoApp(ctk.CTk):
         c_right_header = ctk.CTkFrame(c_right, fg_color="transparent")
         c_right_header.pack(fill="x")
 
-        ctk.CTkLabel(c_right_header, text="2. รายการภาพที่ต้องการนับจำนวน", font=ctk.CTkFont(size=12, weight="bold"), text_color="#FFFFFF").pack(side="left")
+        ctk.CTkLabel(c_right_header, text="2. รายการภาพที่ต้องการนับจำนวน", font=ctk.CTkFont(size=12, weight="bold"), text_color=TEXT_COLOR).pack(side="left")
 
         btn_reset_counting_accum = ctk.CTkButton(
             c_right_header,
+            corner_radius=8,
             text="🔄 รีเซ็ตผลรวม",
             fg_color="transparent",
             border_color=DELETE_RED,
             border_width=1,
-            hover_color="#30151a",
-            text_color="#FF6B6B",
+            hover_color=("#FEE2E2", "#30151a"),
+            text_color=DELETE_RED,
             font=ctk.CTkFont(size=9, weight="bold"),
             height=20,
             width=70,
@@ -1359,7 +1658,7 @@ class FreecameAutoApp(ctk.CTk):
         )
         btn_reset_counting_accum.pack(side="right")
         
-        counting_list_frame = ctk.CTkScrollableFrame(c_right, fg_color="#121214", corner_radius=5, height=120)
+        counting_list_frame = ctk.CTkScrollableFrame(c_right, fg_color=("#F1F5F9", "#121214"), corner_radius=5, height=120)
         counting_list_frame.pack(fill="both", expand=True, pady=4)
         step_data["counting_list_frame"] = counting_list_frame
         
@@ -1381,7 +1680,7 @@ class FreecameAutoApp(ctk.CTk):
         o_left = ctk.CTkFrame(ocr_ui, fg_color="transparent")
         o_left.pack(side="left", fill="both", expand=True, padx=(0, 10))
         
-        ctk.CTkLabel(o_left, text="1. ขอบเขตตัวเลขสำหรับอ่าน (OCR)", font=ctk.CTkFont(size=12, weight="bold"), text_color="#FFFFFF").pack(anchor="w")
+        ctk.CTkLabel(o_left, text="1. ขอบเขตตัวเลขสำหรับอ่าน (OCR)", font=ctk.CTkFont(size=12, weight="bold"), text_color=TEXT_COLOR).pack(anchor="w")
         
         o_region_lbl = ctk.CTkLabel(o_left, text="ขอบเขตตรวจจับ: ทั่วทั้งหน้าจอ", font=ctk.CTkFont(size=11), text_color=TEXT_MUTED, anchor="w")
         o_region_lbl.pack(anchor="w", fill="x", pady=2)
@@ -1392,27 +1691,36 @@ class FreecameAutoApp(ctk.CTk):
         
         o_select_region_btn = ctk.CTkButton(
             o_region_btn_frame,
+            corner_radius=8,
             text="เลือกขอบเขต",
             fg_color="transparent",
-            border_color=ACCENT_ORANGE,
-            border_width=1.5,
-            hover_color="#30201a",
-            text_color="#FFFFFF",
+            border_color=("#CBD5E1", "#1E293B"), border_width=1.5, hover_color=("#DBEAFE", "#30201a"), text_color=ACCENT_ORANGE,
             font=ctk.CTkFont(size=11, weight="bold"),
             height=28,
             width=80,
             command=lambda sid=step_id: self.open_region_picker(sid)
         )
         o_select_region_btn.pack(side="left", fill="x", expand=True, padx=(0, 2))
+
+        o_view_region_btn = ctk.CTkButton(
+            o_region_btn_frame,
+            corner_radius=8,
+            text="ดูขอบเขต",
+            fg_color="transparent",
+            border_color=("#CBD5E1", "#1E293B"), border_width=1.5, hover_color=("#DBEAFE", "#30201a"), text_color=ACCENT_ORANGE,
+            font=ctk.CTkFont(size=11, weight="bold"),
+            height=28,
+            width=65,
+            command=lambda sid=step_id: self.view_search_region(sid)
+        )
+        o_view_region_btn.pack(side="left", fill="x", expand=True, padx=(2, 2))
         
         o_clear_region_btn = ctk.CTkButton(
             o_region_btn_frame,
+            corner_radius=8,
             text="ล้าง",
             fg_color="transparent",
-            border_color=DELETE_RED,
-            border_width=1.5,
-            hover_color="#30151a",
-            text_color="#FFFFFF",
+            border_color=DELETE_RED, border_width=1.5, hover_color=("#FEE2E2", "#30151a"), text_color=DELETE_RED,
             font=ctk.CTkFont(size=11, weight="bold"),
             height=28,
             width=40,
@@ -1435,10 +1743,11 @@ class FreecameAutoApp(ctk.CTk):
         
         btn_ocr_browse = ctk.CTkButton(
             o_btn_box,
+            corner_radius=8,
             text="📁 ไฟล์",
-            fg_color="#1E3A5F",
-            hover_color="#16304F",
-            text_color="#5DBBFF",
+            fg_color=("#E2E8F0", "#1E293B"),
+            hover_color=("#CBD5E1", "#334155"),
+            text_color=("#1E293B", "#F8FAFC"),
             font=ctk.CTkFont(size=10, weight="bold"),
             height=26,
             width=55,
@@ -1448,10 +1757,9 @@ class FreecameAutoApp(ctk.CTk):
         
         btn_ocr_cap = ctk.CTkButton(
             o_btn_box,
+            corner_radius=8,
             text="📸 แคป",
-            fg_color=ACCENT_ORANGE,
-            hover_color=ACCENT_HOVER,
-            text_color="#FFFFFF",
+            fg_color=ACCENT_ORANGE, hover_color=ACCENT_HOVER, text_color="#FFFFFF",
             font=ctk.CTkFont(size=10, weight="bold"),
             height=26,
             width=55,
@@ -1461,12 +1769,13 @@ class FreecameAutoApp(ctk.CTk):
         
         btn_ocr_clear_img = ctk.CTkButton(
             o_btn_box,
+            corner_radius=8,
             text="✕ ล้างภาพ",
             fg_color="transparent",
             border_color=DELETE_RED,
             border_width=1,
-            hover_color="#30151a",
-            text_color="#FF6B6B",
+            hover_color=("#FEE2E2", "#30151a"),
+            text_color=DELETE_RED,
             font=ctk.CTkFont(size=10),
             height=26,
             width=60,
@@ -1477,9 +1786,9 @@ class FreecameAutoApp(ctk.CTk):
         o_right = ctk.CTkFrame(ocr_ui, fg_color="transparent")
         o_right.pack(side="right", fill="both", expand=True, padx=(10, 0))
         
-        ctk.CTkLabel(o_right, text="2. ผลลัพธ์จากการอ่านค่าด้วย OCR", font=ctk.CTkFont(size=12, weight="bold"), text_color="#FFFFFF").pack(anchor="w")
+        ctk.CTkLabel(o_right, text="2. ผลลัพธ์จากการอ่านค่าด้วย OCR", font=ctk.CTkFont(size=12, weight="bold"), text_color=TEXT_COLOR).pack(anchor="w")
         
-        ocr_result_card = ctk.CTkFrame(o_right, fg_color="#121214", corner_radius=5)
+        ocr_result_card = ctk.CTkFrame(o_right, fg_color=("#F1F5F9", "#121214"), corner_radius=5)
         ocr_result_card.pack(fill="both", expand=True, pady=4)
         
         ocr_sum_header = ctk.CTkFrame(ocr_result_card, fg_color="transparent")
@@ -1490,12 +1799,13 @@ class FreecameAutoApp(ctk.CTk):
 
         btn_reset_ocr_sum = ctk.CTkButton(
             ocr_sum_header,
+            corner_radius=8,
             text="🔄 รีเซ็ต",
             fg_color="transparent",
             border_color=DELETE_RED,
             border_width=1,
-            hover_color="#30151a",
-            text_color="#FF6B6B",
+            hover_color=("#FEE2E2", "#30151a"),
+            text_color=DELETE_RED,
             font=ctk.CTkFont(size=9, weight="bold"),
             height=20,
             width=50,
@@ -1510,7 +1820,7 @@ class FreecameAutoApp(ctk.CTk):
         lbl_ocr_text_title = ctk.CTkLabel(ocr_result_card, text="ข้อความดิบจากหน้าจอ (Raw text):", font=ctk.CTkFont(size=9), text_color=TEXT_MUTED)
         lbl_ocr_text_title.pack(anchor="w", padx=10, pady=(2, 0))
         
-        lbl_ocr_text_val = ctk.CTkLabel(ocr_result_card, text="(ยังไม่ได้สแกน)", font=ctk.CTkFont(size=10), text_color="#FFFFFF", wraplength=200, justify="left")
+        lbl_ocr_text_val = ctk.CTkLabel(ocr_result_card, text="(ยังไม่ได้สแกน)", font=ctk.CTkFont(size=10), text_color=TEXT_COLOR, wraplength=200, justify="left")
         lbl_ocr_text_val.pack(anchor="w", padx=10, pady=(0, 6))
         step_data["lbl_ocr_result_text"] = lbl_ocr_text_val
 
@@ -1519,7 +1829,7 @@ class FreecameAutoApp(ctk.CTk):
         self.add_log(f"[+] เพิ่มขั้นตอนที่ {len(self.steps)} โหมด: บอตปกติ")
         
         # Auto scroll to bottom
-        self.steps_scroll._parent_canvas.yview_moveto(1.0)
+        scroll_container._parent_canvas.yview_moveto(1.0)
 
     def add_counting_target(self, step_id):
         step = next((s for s in self.steps if s["id"] == step_id), None)
@@ -1666,10 +1976,11 @@ class FreecameAutoApp(ctk.CTk):
         # Delete button on the right
         del_btn = ctk.CTkButton(
             row,
+            corner_radius=8,
             text="✕",
             fg_color="transparent",
             hover_color=DELETE_HOVER,
-            text_color="#FF6B6B",
+            text_color=DELETE_RED,
             font=ctk.CTkFont(size=10, weight="bold"),
             width=22,
             height=22,
@@ -1685,7 +1996,7 @@ class FreecameAutoApp(ctk.CTk):
         target["val_lbl"] = val_lbl
         
         # Thumbnail preview
-        preview = ctk.CTkLabel(row, text="", width=30, height=20, fg_color="#121214")
+        preview = ctk.CTkLabel(row, text="", width=30, height=20, fg_color=("#F1F5F9", "#121214"))
         preview.pack(side="left", padx=(5, 5))
         
         try:
@@ -1697,7 +2008,7 @@ class FreecameAutoApp(ctk.CTk):
             preview.configure(text="N/A")
             
         # Filename label
-        name_lbl = ctk.CTkLabel(row, text=fname[:12], font=ctk.CTkFont(size=10), text_color="#FFFFFF", anchor="w")
+        name_lbl = ctk.CTkLabel(row, text=fname[:12], font=ctk.CTkFont(size=10), text_color=TEXT_COLOR, anchor="w")
         name_lbl.pack(side="left", padx=(2, 5))
         
         # Confidence slider inside row
@@ -1745,6 +2056,7 @@ class FreecameAutoApp(ctk.CTk):
         if idx is not None and idx > 0:
             self.steps[idx], self.steps[idx - 1] = self.steps[idx - 1], self.steps[idx]
             self.reorder_step_cards_ui()
+            self.flash_card_border(self.steps[idx - 1]["card_frame"])
             self.add_log(f"[*] เลื่อนขั้นตอนที่ {idx + 1} ขึ้นเป็นขั้นตอนที่ {idx}")
 
     def move_step_down(self, step_id):
@@ -1752,6 +2064,7 @@ class FreecameAutoApp(ctk.CTk):
         if idx is not None and idx < len(self.steps) - 1:
             self.steps[idx], self.steps[idx + 1] = self.steps[idx + 1], self.steps[idx]
             self.reorder_step_cards_ui()
+            self.flash_card_border(self.steps[idx + 1]["card_frame"])
             self.add_log(f"[*] เลื่อนขั้นตอนที่ {idx + 1} ลงเป็นขั้นตอนที่ {idx + 2}")
 
     def reorder_step_cards_ui(self):
@@ -1853,14 +2166,62 @@ class FreecameAutoApp(ctk.CTk):
     def open_region_picker(self, step_id):
         RegionPicker(self, lambda x, y, w, h: self.set_search_region(step_id, x, y, w, h))
 
+    def view_search_region(self, step_id):
+        step = next((s for s in self.steps if s["id"] == step_id), None)
+        if step and step.get("search_region"):
+            reg = step["search_region"]
+            RegionViewer(self, reg["x"], reg["y"], reg["w"], reg["h"])
+        else:
+            messagebox.showinfo("แจ้งเตือน", "ยังไม่ได้ตั้งค่าขอบเขตสำหรับขั้นตอนนี้\n(ระบบจะค้นหาทั่วทั้งหน้าจอ)")
+
+    def apply_smooth_scroll(self, scroll_frame):
+        canvas = scroll_frame._parent_canvas
+
+        canvas.target_y = canvas.yview()[0]
+        canvas.current_y = canvas.yview()[0]
+        canvas.scroll_job = None
+        
+        def animate_scroll():
+            diff = canvas.target_y - canvas.current_y
+            if abs(diff) > 0.001:
+                canvas.current_y += diff * 0.25
+                canvas.yview_moveto(canvas.current_y)
+                canvas.scroll_job = self.after(16, animate_scroll)
+            else:
+                canvas.yview_moveto(canvas.target_y)
+                canvas.current_y = canvas.target_y
+                canvas.scroll_job = None
+
+        def smooth_mouse_wheel(event):
+            y_min, y_max = canvas.yview()
+            scroll_range = y_max - y_min
+            if scroll_range >= 1.0:
+                return
+                
+            step = -1 * (event.delta / 120) * 0.07  # Increased step slightly for better responsiveness
+            
+            # If not animating, sync start positions with current scrollbar location
+            if not canvas.scroll_job:
+                canvas.current_y = canvas.yview()[0]
+                canvas.target_y = canvas.current_y
+                
+            # Accumulate scroll target
+            canvas.target_y = max(0.0, min(1.0 - scroll_range, canvas.target_y + step))
+            
+            # Start animation loop only if it's not already running
+            if not canvas.scroll_job:
+                animate_scroll()
+            
+        scroll_frame._mouse_wheel = smooth_mouse_wheel
+
     def set_search_region(self, step_id, x, y, w, h):
         step = next((s for s in self.steps if s["id"] == step_id), None)
         if step:
             step["search_region"] = {"x": x, "y": y, "w": w, "h": h}
             region_text = f"ขอบเขต: X={x} Y={y}\nขนาด: {w}x{h}"
-            step["region_label"].configure(text=region_text, text_color="#FFFFFF")
-            step["counting_region_label"].configure(text=region_text, text_color="#FFFFFF")
-            step["ocr_region_label"].configure(text=region_text, text_color="#FFFFFF")
+            step["region_label"].configure(text=region_text, text_color=TEXT_COLOR)
+            step["counting_region_label"].configure(text=region_text, text_color=TEXT_COLOR)
+            step["ocr_region_label"].configure(text=region_text, text_color=TEXT_COLOR)
             idx = self.steps.index(step) + 1
             self.add_log(f"[+] ขั้นตอนที่ {idx}: ตั้งค่าขอบเขตแสกน X={x}, Y={y}, กว้าง={w}, สูง={h}")
 
@@ -1882,24 +2243,26 @@ class FreecameAutoApp(ctk.CTk):
         if step is None or x is None or y is None:
             return
 
-        point = {"x": x, "y": y, "delay_after": 0.0, "click_count": 1}
+        point = {"x": x, "y": y, "delay_after": 0.0, "click_count": 1, "click_interval": 0.1, "random_offset": 3}
         step["click_targets"].append(point)
         point_index = len(step["click_targets"]) - 1
 
         if point_index == 0:
             step["click_targets_placeholder"].pack_forget()
 
-        self._render_click_point_row(step, point_index)
+        self._render_click_point_row(step, point_index, flash=True)
 
         idx = self.steps.index(step) + 1
         self.add_log(f"[+] ขั้นตอนที่ {idx}: เพิ่มจุดคลิกที่ {point_index + 1} → X={x}, Y={y}")
 
-    def _render_click_point_row(self, step, point_index):
+    def _render_click_point_row(self, step, point_index, flash=False):
         step_id = step["id"]
         point = step["click_targets"][point_index]
 
         row_frame = ctk.CTkFrame(step["click_targets_frame"], fg_color=POINT_TAG_COLOR, corner_radius=4)
         row_frame.pack(fill="x", padx=6, pady=2)
+        if flash:
+            self.flash_point_row(row_frame)
 
         if "action" not in point:
             point["action"] = "click"
@@ -1914,10 +2277,11 @@ class FreecameAutoApp(ctk.CTk):
 
         del_pt_btn = ctk.CTkButton(
             row_frame,
+            corner_radius=8,
             text="✕",
             fg_color="transparent",
             hover_color=DELETE_HOVER,
-            text_color="#FF6B6B",
+            text_color=DELETE_RED,
             font=ctk.CTkFont(size=10, weight="bold"),
             width=22,
             height=22,
@@ -1932,11 +2296,12 @@ class FreecameAutoApp(ctk.CTk):
             width=46,
             height=22,
             font=ctk.CTkFont(family="Consolas", size=9),
-            fg_color="#0F0F11",
-            border_color=ACCENT_ORANGE,
+            fg_color=("#FFFFFF", "#0F0F11"),
+            text_color=("#0F172A", "#FFFFFF"),
+            border_color=("#CBD5E1", "#1E293B"),
             border_width=1,
             justify="center",
-            placeholder_text="0.0"
+            placeholder_text="0.2-0.5"
         )
         current_delay = point.get("delay_after", 0.0)
         if isinstance(current_delay, (int, float)):
@@ -1953,7 +2318,7 @@ class FreecameAutoApp(ctk.CTk):
             row_frame,
             text=f" {point_index + 1} ",
             font=ctk.CTkFont(size=10, weight="bold"),
-            text_color="#FFFFFF",
+            text_color=TEXT_COLOR,
             fg_color=ACCENT_ORANGE,
             corner_radius=3,
             width=20,
@@ -1967,8 +2332,9 @@ class FreecameAutoApp(ctk.CTk):
             width=42,
             height=22,
             font=ctk.CTkFont(family="Consolas", size=9),
-            fg_color="#0F0F11",
-            border_color=ACCENT_ORANGE,
+            fg_color=("#FFFFFF", "#0F0F11"),
+            text_color=("#0F172A", "#FFFFFF"),
+            border_color=("#CBD5E1", "#1E293B"),
             border_width=1,
             justify="center"
         )
@@ -1981,8 +2347,9 @@ class FreecameAutoApp(ctk.CTk):
             width=42,
             height=22,
             font=ctk.CTkFont(family="Consolas", size=9),
-            fg_color="#0F0F11",
-            border_color=ACCENT_ORANGE,
+            fg_color=("#FFFFFF", "#0F0F11"),
+            text_color=("#0F172A", "#FFFFFF"),
+            border_color=("#CBD5E1", "#1E293B"),
             border_width=1,
             justify="center"
         )
@@ -1991,9 +2358,10 @@ class FreecameAutoApp(ctk.CTk):
 
         repick_btn = ctk.CTkButton(
             row_frame,
+            corner_radius=8,
             text="🎯",
             fg_color="transparent",
-            hover_color="#30201a",
+            hover_color=("#DBEAFE", "#30201a"),
             text_color=ACCENT_ORANGE,
             font=ctk.CTkFont(size=9, weight="bold"),
             width=20,
@@ -2002,6 +2370,24 @@ class FreecameAutoApp(ctk.CTk):
                 self.open_coordinate_picker_edit(sid, pi, xe, ye)
         )
         repick_btn.pack(side="left", padx=(1, 6))
+        
+        # Random Offset Configuration (px)
+        ctk.CTkLabel(row_frame, text="สุ่ม:", font=ctk.CTkFont(size=9), text_color=TEXT_MUTED).pack(side="left", padx=(4, 1))
+        offset_entry = ctk.CTkEntry(
+            row_frame,
+            width=28,
+            height=22,
+            font=ctk.CTkFont(family="Consolas", size=9),
+            fg_color=("#FFFFFF", "#0F0F11"),
+            text_color=("#0F172A", "#FFFFFF"),
+            border_color=("#CBD5E1", "#1E293B"),
+            border_width=1,
+            justify="center",
+            placeholder_text="3"
+        )
+        offset_entry.insert(0, str(point.get("random_offset", 3)))
+        offset_entry.pack(side="left", padx=(0, 2))
+        ctk.CTkLabel(row_frame, text="px", font=ctk.CTkFont(size=9), text_color=TEXT_MUTED).pack(side="left", padx=1)
 
         mode_menu = ctk.CTkOptionMenu(
             row_frame,
@@ -2009,9 +2395,10 @@ class FreecameAutoApp(ctk.CTk):
             font=ctk.CTkFont(family="Segoe UI", size=9, weight="bold"),
             width=100,
             height=22,
-            fg_color="#1E3A5F",
+            fg_color=("#E2E8F0", "#1E293B"),
             button_color="#1E3A5F",
-            button_hover_color="#16304F",
+            button_hover_color=("#CBD5E1", "#334155"),
+            text_color=("#1E293B", "#FFFFFF"),
             dropdown_font=ctk.CTkFont(family="Segoe UI", size=9)
         )
         mode_map_inv = {"click": "คลิกอย่างเดียว", "type": "พิมพ์อย่างเดียว", "click_type": "คลิกแล้วพิมพ์"}
@@ -2028,15 +2415,32 @@ class FreecameAutoApp(ctk.CTk):
             width=28,
             height=22,
             font=ctk.CTkFont(family="Consolas", size=9),
-            fg_color="#0F0F11",
-            border_color=ACCENT_ORANGE,
+            fg_color=("#FFFFFF", "#0F0F11"),
+            text_color=("#0F172A", "#FFFFFF"),
+            border_color=("#CBD5E1", "#1E293B"),
             border_width=1,
             justify="center",
             placeholder_text="1"
         )
         click_entry.insert(0, str(point.get("click_count", 1)))
         click_entry.pack(side="left", padx=1)
-        ctk.CTkLabel(click_sub, text="ครั้ง", font=ctk.CTkFont(size=9), text_color=TEXT_MUTED).pack(side="left", padx=1)
+        ctk.CTkLabel(click_sub, text="ครั้ง ห่าง:", font=ctk.CTkFont(size=9), text_color=TEXT_MUTED).pack(side="left", padx=1)
+        
+        interval_entry = ctk.CTkEntry(
+            click_sub,
+            width=32,
+            height=22,
+            font=ctk.CTkFont(family="Consolas", size=9),
+            fg_color=("#FFFFFF", "#0F0F11"),
+            text_color=("#0F172A", "#FFFFFF"),
+            border_color=("#CBD5E1", "#1E293B"),
+            border_width=1,
+            justify="center",
+            placeholder_text="0.1-0.3"
+        )
+        interval_entry.insert(0, str(point.get("click_interval", 0.1)))
+        interval_entry.pack(side="left", padx=1)
+        ctk.CTkLabel(click_sub, text="วิ", font=ctk.CTkFont(size=9), text_color=TEXT_MUTED).pack(side="left", padx=1)
 
         delay_before_sub = ctk.CTkFrame(action_container, fg_color="transparent")
         ctk.CTkLabel(delay_before_sub, text="รอพิมพ์:", font=ctk.CTkFont(size=9), text_color=TEXT_MUTED).pack(side="left", padx=1)
@@ -2045,8 +2449,9 @@ class FreecameAutoApp(ctk.CTk):
             width=32,
             height=22,
             font=ctk.CTkFont(family="Consolas", size=9),
-            fg_color="#0F0F11",
-            border_color=ACCENT_ORANGE,
+            fg_color=("#FFFFFF", "#0F0F11"),
+            text_color=("#0F172A", "#FFFFFF"),
+            border_color=("#CBD5E1", "#1E293B"),
             border_width=1,
             justify="center",
             placeholder_text="0.2"
@@ -2062,8 +2467,9 @@ class FreecameAutoApp(ctk.CTk):
             width=120,
             height=22,
             font=ctk.CTkFont(family="Segoe UI", size=9),
-            fg_color="#0F0F11",
-            border_color=ACCENT_ORANGE,
+            fg_color=("#FFFFFF", "#0F0F11"),
+            text_color=("#0F172A", "#FFFFFF"),
+            border_color=("#CBD5E1", "#1E293B"),
             border_width=1,
             placeholder_text="ข้อความ..."
         )
@@ -2093,6 +2499,8 @@ class FreecameAutoApp(ctk.CTk):
         x_entry.bind("<KeyRelease>", lambda event, sid=step_id, pi=point_index, entry=x_entry: self.update_point_x(sid, pi, entry.get()))
         y_entry.bind("<KeyRelease>", lambda event, sid=step_id, pi=point_index, entry=y_entry: self.update_point_y(sid, pi, entry.get()))
         click_entry.bind("<KeyRelease>", lambda event, sid=step_id, pi=point_index, entry=click_entry: self.update_point_click_count(sid, pi, entry.get()))
+        interval_entry.bind("<KeyRelease>", lambda event, sid=step_id, pi=point_index, entry=interval_entry: self.update_point_click_interval(sid, pi, entry.get()))
+        offset_entry.bind("<KeyRelease>", lambda event, sid=step_id, pi=point_index, entry=offset_entry: self.update_point_random_offset(sid, pi, entry.get()))
         delay_before_entry.bind("<KeyRelease>", lambda event, sid=step_id, pi=point_index, entry=delay_before_entry: self.update_point_delay_before_type(sid, pi, entry.get()))
         type_entry.bind("<KeyRelease>", lambda event, sid=step_id, pi=point_index, entry=type_entry: self.update_point_type_text(sid, pi, entry.get()))
         delay_entry.bind("<KeyRelease>", lambda event, sid=step_id, pi=point_index, entry=delay_entry: self.update_point_delay(sid, pi, entry.get()))
@@ -2107,6 +2515,24 @@ class FreecameAutoApp(ctk.CTk):
             try:
                 val = int(value_str)
                 step["click_targets"][point_index]["click_count"] = max(1, val)
+            except ValueError:
+                pass
+
+    def update_point_click_interval(self, step_id, point_index, value_str):
+        step = next((s for s in self.steps if s["id"] == step_id), None)
+        if step is None:
+            return
+        if 0 <= point_index < len(step["click_targets"]):
+            step["click_targets"][point_index]["click_interval"] = value_str.strip()
+
+    def update_point_random_offset(self, step_id, point_index, value_str):
+        step = next((s for s in self.steps if s["id"] == step_id), None)
+        if step is None:
+            return
+        if 0 <= point_index < len(step["click_targets"]):
+            try:
+                val = int(value_str)
+                step["click_targets"][point_index]["random_offset"] = max(0, val)
             except ValueError:
                 pass
 
@@ -2249,7 +2675,7 @@ class FreecameAutoApp(ctk.CTk):
         if file_path:
             step["template_path"] = file_path
             filename = os.path.basename(file_path)
-            step["image_label"].configure(text=filename, text_color="#FFFFFF")
+            step["image_label"].configure(text=filename, text_color=TEXT_COLOR)
             idx = self.steps.index(step) + 1
             self.add_log(f"[+] ขั้นตอนที่ {idx}: โหลดภาพ {filename}")
             
@@ -2286,7 +2712,7 @@ class FreecameAutoApp(ctk.CTk):
         try:
             img.save(file_path)
             step["template_path"] = file_path
-            step["image_label"].configure(text=filename, text_color="#FFFFFF")
+            step["image_label"].configure(text=filename, text_color=TEXT_COLOR)
             idx = self.steps.index(step) + 1
             self.add_log(f"[+] ขั้นตอนที่ {idx}: แคปเจอร์และบันทึกรูป {filename}")
             
@@ -2469,17 +2895,25 @@ class FreecameAutoApp(ctk.CTk):
                                 effective_clicks = 1 if pt_action == "type" else click_count
 
                                 if pt_action != "type" or type_text:
+                                    click_interval = point.get("click_interval", 0.1)
                                     for c in range(effective_clicks):
                                         if not self.bot_running:
                                             break
                                             
-                                        offset_x = random.randint(-3, 3)
-                                        offset_y = random.randint(-3, 3)
+                                        r_offset = int(point.get("random_offset", 3))
+                                        if r_offset > 0:
+                                            offset_x = random.randint(-r_offset, r_offset)
+                                            offset_y = random.randint(-r_offset, r_offset)
+                                        else:
+                                            offset_x = 0
+                                            offset_y = 0
                                         click_x = target_x + offset_x
                                         click_y = target_y + offset_y
 
                                         if is_turbo:
                                             win32api.SetCursorPos((click_x, click_y))
+                                            # A tiny sleep of 5ms ensures Windows updates coordinates before firing mouse_event
+                                            time.sleep(0.005)
                                             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, click_x, click_y, 0, 0)
                                             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, click_x, click_y, 0, 0)
                                             
@@ -2489,7 +2923,7 @@ class FreecameAutoApp(ctk.CTk):
                                                 self.type_text_with_keys(step.get("type_text", ""), is_turbo=True)
                                                 self.add_log(f"[+] พิมพ์ข้อความสำเร็จ")
                                             else:
-                                                self.add_log(f"[+] คลิกจุดที่ {pt_idx + 1}: X={target_x} (สุ่ม {click_x}), Y={target_y} (สุ่ม {click_y}) (Turbo) [ครั้งที่ {c + 1}/{effective_clicks}]")
+                                                self.add_log(f"[+] คลิกจุดที่ {pt_idx + 1}: X={target_x} (สุ่ม {click_x}), Y={target_y} (สุ่ม {click_y}) (สุ่ม ±{r_offset}px) (Turbo) [ครั้งที่ {c + 1}/{effective_clicks}]")
                                         else:
                                             duration = random.uniform(0.2, 0.4)
                                             pyautogui.moveTo(click_x, click_y, duration=duration)
@@ -2504,10 +2938,14 @@ class FreecameAutoApp(ctk.CTk):
                                                 self.type_text_with_keys(step.get("type_text", ""), is_turbo=False)
                                                 self.add_log(f"[+] พิมพ์ข้อความสำเร็จ")
                                             else:
-                                                self.add_log(f"[+] คลิกจุดที่ {pt_idx + 1}: X={target_x} (สุ่ม {click_x}), Y={target_y} (สุ่ม {click_y}) [ครั้งที่ {c + 1}/{effective_clicks}]")
-                                                
+                                                self.add_log(f"[+] คลิกจุดที่ {pt_idx + 1}: X={target_x} (สุ่ม {click_x}), Y={target_y} (สุ่ม {click_y}) (สุ่ม ±{r_offset}px) [ครั้งที่ {c + 1}/{effective_clicks}]")
+                                        
+                                        # Delay between clicks if not the last click
                                         if c < effective_clicks - 1:
-                                            time.sleep(0.05 if is_turbo else 0.15)
+                                            actual_interval = self.get_randomized_delay(click_interval)
+                                            if actual_interval > 0:
+                                                self.add_log(f"[*] เว้นช่วงคลิก {actual_interval:.2f} วินาที...")
+                                            time.sleep(actual_interval)
                                 
                                 if pt_action == "click_type" and type_text and self.bot_running:
                                     if delay_before > 0:
@@ -2707,12 +3145,106 @@ class FreecameAutoApp(ctk.CTk):
                         time.sleep(delay_time)
                 
                 if not condition_triggered:
-                    sleep_time = 0.01 if self.turbo_mode_var.get() else 0.2
-                    time.sleep(sleep_time)
+                    time.sleep(0.2)
                     
             except Exception as e:
                 self.add_log(f"[Error ในลูปหลักตรวจจับ] {e}")
                 time.sleep(1.0)
+
+    def on_step_name_change(self, step_id, name):
+        for step in self.steps:
+            if step["id"] == step_id:
+                step["step_name"] = name
+                # Update dashboard if dashboard exists
+                if "stats_title" in step and step["stats_title"] and step["stats_title"].winfo_exists():
+                    idx = self.steps.index(step) + 1
+                    step["stats_title"].configure(text=f"ขั้นตอนที่ {idx} ({name if name else step['mode']})")
+                break
+
+    def toggle_jump_sidebars(self):
+        self.show_jump_sidebar = not self.show_jump_sidebar
+        if self.show_jump_sidebar:
+            self.jump_sidebar.pack(side="right", fill="y", padx=(10, 0))
+            self.btn_toggle_sidebar_normal.configure(text="📍 ซ่อนแถบทางลัด")
+            self.btn_toggle_sidebar_detection.configure(text="📍 ซ่อนแถบทางลัด")
+        else:
+            self.jump_sidebar.pack_forget()
+            self.btn_toggle_sidebar_normal.configure(text="📍 แสดงแถบทางลัด")
+            self.btn_toggle_sidebar_detection.configure(text="📍 แสดงแถบทางลัด")
+
+    def rebuild_jump_sidebars(self):
+        # Clear existing sidebar widgets
+        for widget in self.jump_sidebar.winfo_children():
+            widget.destroy()
+            
+        lbl_nav = ctk.CTkLabel(
+            self.jump_sidebar,
+            text="Jump",
+            font=ctk.CTkFont(family="Segoe UI", size=9, weight="bold"),
+            text_color=TEXT_MUTED
+        )
+        lbl_nav.pack(pady=(0, 5))
+        
+        # Populate buttons globally
+        for i, step in enumerate(self.steps):
+            btn_txt = f"{i+1}"
+            
+            # Color-code buttons based on mode
+            if step["mode"] == "บอตปกติ":
+                btn_bg = ("#E2E8F0", "#1E293B")
+                btn_text_color = TEXT_COLOR
+            else:
+                # Highlight Object Counting / OCR steps with Orange Accent
+                btn_bg = ACCENT_ORANGE
+                btn_text_color = "#FFFFFF"
+                
+            btn = ctk.CTkButton(
+                self.jump_sidebar,
+                text=btn_txt,
+                width=24,
+                height=24,
+                corner_radius=12,
+                fg_color=btn_bg,
+                hover_color=ACCENT_HOVER,
+                text_color=btn_text_color,
+                font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+                command=lambda idx=i: self.jump_to_step(idx)
+            )
+            btn.pack(pady=2)
+            
+            # Setup hover tooltip containing step name or step mode
+            name_val = step.get("step_name", "")
+            tooltip_txt = f"ขั้นตอนที่ {i+1}: {name_val}" if name_val else f"ขั้นตอนที่ {i+1} ({step['mode']})"
+            CTkToolTip(btn, tooltip_txt)
+
+    def jump_to_step(self, step_index):
+        if step_index < len(self.steps):
+            step = self.steps[step_index]
+            
+            # Auto-switch to the correct tab first
+            if step["mode"] == "บอตปกติ":
+                self.tabview.set("🤖 ตั้งค่าบอตปกติ")
+            else:
+                self.tabview.set("🔍 นับวัตถุ & OCR")
+                
+            # Allow GUI to map the frames
+            self.update_idletasks()
+            
+            card = step.get("card_frame")
+            if card and card.winfo_exists():
+                try:
+                    canvas = card.master._parent_canvas
+                    canvas.update_idletasks()
+                    
+                    y = card.winfo_y()
+                    total_h = canvas.bbox("all")[3]
+                    
+                    if total_h > 0:
+                        fraction = y / total_h
+                        canvas.yview_moveto(fraction)
+                        self.flash_card_border(card)
+                except Exception as e:
+                    self.add_log(f"[!] ไม่สามารถกระโดดไปขั้นตอนได้: {e}")
 
     def save_config(self):
         """บันทึก steps ทั้งหมดลง JSON file ที่ผู้ใช้เลือก"""
@@ -2742,6 +3274,8 @@ class FreecameAutoApp(ctk.CTk):
                     "y": pt["y"],
                     "delay_after": pt.get("delay_after", 0.0),
                     "click_count": pt.get("click_count", 1),
+                    "click_interval": pt.get("click_interval", 0.1),
+                    "random_offset": pt.get("random_offset", 3),
                     "action": pt.get("action", "click"),
                     "type_text": pt.get("type_text", ""),
                     "delay_before_type": pt.get("delay_before_type", 0.2)
@@ -2759,6 +3293,7 @@ class FreecameAutoApp(ctk.CTk):
 
             step_entry = {
                 "mode": step.get("mode", "บอตปกติ"),
+                "step_name": step.get("step_name", ""),
                 "template_path": step["template_path"],
                 "confidence": step["confidence"],
                 "delay": step["delay"],
@@ -2821,19 +3356,23 @@ class FreecameAutoApp(ctk.CTk):
         loaded_count = 0
 
         for step_entry in steps_data:
-            self.add_step()
-            step = self.steps[-1]
-
             mode_val = step_entry.get("mode", "บอตปกติ")
-            if "mode_selector" in step and step["mode_selector"].winfo_exists():
-                step["mode_selector"].set(mode_val)
+            self.add_step(mode=mode_val)
+            step = self.steps[-1]
             self.change_step_mode(step["id"], mode_val)
+            
+            # Restore step name
+            step_name = step_entry.get("step_name", "")
+            step["step_name"] = step_name
+            if "step_name_entry" in step and step["step_name_entry"].winfo_exists():
+                step["step_name_entry"].delete(0, "end")
+                step["step_name_entry"].insert(0, step_name)
 
             tmpl = step_entry.get("template_path")
             if tmpl and os.path.isfile(tmpl):
                 step["template_path"] = tmpl
                 step["image_label"].configure(
-                    text=os.path.basename(tmpl), text_color="#FFFFFF"
+                    text=os.path.basename(tmpl), text_color=TEXT_COLOR
                 )
                 try:
                     pil_img = Image.open(tmpl)
@@ -2876,15 +3415,17 @@ class FreecameAutoApp(ctk.CTk):
             if reg:
                 step["search_region"] = reg
                 region_text = f"ขอบเขต: X={reg['x']} Y={reg['y']}\nขนาด: {reg['w']}x{reg['h']}"
-                step["region_label"].configure(text=region_text, text_color="#FFFFFF")
-                step["counting_region_label"].configure(text=region_text, text_color="#FFFFFF")
-                step["ocr_region_label"].configure(text=region_text, text_color="#FFFFFF")
+                step["region_label"].configure(text=region_text, text_color=TEXT_COLOR)
+                step["counting_region_label"].configure(text=region_text, text_color=TEXT_COLOR)
+                step["ocr_region_label"].configure(text=region_text, text_color=TEXT_COLOR)
 
             for pt in step_entry.get("click_targets", []):
                 x = pt.get("x")
                 y = pt.get("y")
                 delay_after = pt.get("delay_after", 0.0)
                 click_count = pt.get("click_count", 1)
+                click_interval = pt.get("click_interval", 0.1)
+                random_offset = pt.get("random_offset", 3)
                 action = pt.get("action", "click")
                 type_text = pt.get("type_text", "")
                 delay_before_type = pt.get("delay_before_type", 0.2)
@@ -2895,6 +3436,8 @@ class FreecameAutoApp(ctk.CTk):
                         "y": y,
                         "delay_after": delay_after,
                         "click_count": click_count,
+                        "click_interval": click_interval,
+                        "random_offset": random_offset,
                         "action": action,
                         "type_text": type_text,
                         "delay_before_type": delay_before_type
@@ -2903,6 +3446,17 @@ class FreecameAutoApp(ctk.CTk):
                     if point_index == 0:
                         step["click_targets_placeholder"].pack_forget()
                     self._render_click_point_row(step, point_index)
+                    
+                    # Update offset entry to match loaded value
+                    try:
+                        row_frame_childs = step["click_targets"][-1]["_row_frame"].winfo_children()
+                        # The offset entry is the CTkEntry after repick_btn
+                        # We can configure it if saved value is different from default 3
+                        # But since _render_click_point_row handles point.get("random_offset", 3)
+                        # inside the widget creation itself, it will render correctly!
+                        pass
+                    except Exception:
+                        pass
 
             for t_entry in step_entry.get("counting_targets", []):
                 path = t_entry.get("path")
@@ -2922,6 +3476,7 @@ class FreecameAutoApp(ctk.CTk):
 
             loaded_count += 1
 
+        self.rebuild_jump_sidebars()
         self.add_log(f"[✓] โหลดการตั้งค่า {loaded_count} ขั้นตอน จาก {filename} สำเร็จ")
         messagebox.showinfo("โหลดสำเร็จ", f"โหลดเงื่อนไขทั้งหมด {loaded_count} ขั้นตอน\nจากไฟล์: {filename}")
 
