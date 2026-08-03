@@ -929,6 +929,7 @@ class FreecameAutoApp(ctk.CTk):
             try:
                 import urllib.request
                 import urllib.parse
+                import urllib.error
                 import json
                 
                 url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -940,6 +941,8 @@ class FreecameAutoApp(ctk.CTk):
                 }).encode("utf-8")
                 
                 req = urllib.request.Request(url, data=data, method="POST")
+                req.add_header("Content-Type", "application/x-www-form-urlencoded")
+                
                 with urllib.request.urlopen(req, timeout=5) as response:
                     res = json.loads(response.read().decode("utf-8"))
                     if res.get("ok"):
@@ -949,6 +952,15 @@ class FreecameAutoApp(ctk.CTk):
                         desc = res.get('description', 'Unknown API Error')
                         self.add_log(f"[Error] Telegram API error: {desc}")
                         messagebox.showerror("ล้มเหลว", f"เกิดข้อผิดพลาดจาก Telegram API:\n{desc}")
+            except urllib.error.HTTPError as he:
+                try:
+                    err_body = he.read().decode("utf-8")
+                    err_json = json.loads(err_body)
+                    desc = err_json.get("description", err_body)
+                except Exception:
+                    desc = he.reason
+                self.add_log(f"[Error] Telegram API HTTP Error {he.code}: {desc}")
+                messagebox.showerror("ล้มเหลว", f"เกิดข้อผิดพลาดจาก Telegram API (HTTP {he.code}):\n{desc}\n\n*หมายเหตุ: บอตจะไม่สามารถส่งข้อความหาคุณได้จนกว่าคุณจะเข้าไปในแชทบอตตัวนั้นในแอป Telegram แล้วกดปุ่ม START (หรือส่งข้อความหาบอตก่อนอย่างน้อย 1 ครั้ง)")
             except Exception as e:
                 self.add_log(f"[Error] ไม่สามารถส่งแจ้งเตือน Telegram ได้: {e}")
                 messagebox.showerror("ล้มเหลว", f"ไม่สามารถเชื่อมต่อหรือส่งสัญญาณไปยัง Telegram ได้:\n{e}")
@@ -966,6 +978,7 @@ class FreecameAutoApp(ctk.CTk):
             try:
                 import urllib.request
                 import urllib.parse
+                import urllib.error
                 import json
                 
                 url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -976,12 +989,22 @@ class FreecameAutoApp(ctk.CTk):
                 }).encode("utf-8")
                 
                 req = urllib.request.Request(url, data=data, method="POST")
+                req.add_header("Content-Type", "application/x-www-form-urlencoded")
+                
                 with urllib.request.urlopen(req, timeout=5) as response:
                     res = json.loads(response.read().decode("utf-8"))
                     if res.get("ok"):
                         self.add_log(f"[✓] ส่งแจ้งเตือน Telegram สำเร็จ")
                     else:
                         self.add_log(f"[Error] Telegram API error: {res.get('description')}")
+            except urllib.error.HTTPError as he:
+                try:
+                    err_body = he.read().decode("utf-8")
+                    err_json = json.loads(err_body)
+                    desc = err_json.get("description", err_body)
+                except Exception:
+                    desc = he.reason
+                self.add_log(f"[Error] Telegram API HTTP Error {he.code}: {desc}")
             except Exception as e:
                 self.add_log(f"[Error] ไม่สามารถส่งแจ้งเตือน Telegram ได้: {e}")
                 
