@@ -433,6 +433,7 @@ class FreecameAutoApp(ctk.CTk):
         self.telegram_monitor_normal_var = tk.BooleanVar(value=True)
         self.telegram_monitor_counting_var = tk.BooleanVar(value=True)
         self.telegram_monitor_ocr_var = tk.BooleanVar(value=True)
+        self.telegram_global_timeout_var = tk.StringVar(value="300")
         
         # Analytics Data
         self.stats_data = {
@@ -859,6 +860,27 @@ class FreecameAutoApp(ctk.CTk):
             height=28
         )
         chat_entry.pack(side="left", fill="x", expand=True, padx=(10, 0))
+        
+        # Global Timeout Input
+        global_timeout_frame = ctk.CTkFrame(tele_card, fg_color="transparent")
+        global_timeout_frame.pack(fill="x", padx=20, pady=8)
+        ctk.CTkLabel(global_timeout_frame, text="เวลาแจ้งเตือนหากค้างส่วนกลาง:", font=ctk.CTkFont(size=12), text_color=TEXT_COLOR, width=170, anchor="w").pack(side="left")
+        
+        global_timeout_entry = ctk.CTkEntry(
+            global_timeout_frame,
+            textvariable=self.telegram_global_timeout_var,
+            placeholder_text="300",
+            font=ctk.CTkFont(family="Consolas", size=11),
+            fg_color=("#FFFFFF", "#0F0F11"),
+            text_color=TEXT_COLOR,
+            border_color=("#CBD5E1", "#1E293B"),
+            border_width=1,
+            width=60,
+            height=28,
+            justify="center"
+        )
+        global_timeout_entry.pack(side="left", padx=(10, 0))
+        ctk.CTkLabel(global_timeout_frame, text="วินาที", font=ctk.CTkFont(size=12), text_color=TEXT_MUTED).pack(side="left", padx=5)
         
         # Checkboxes for mode monitoring selection
         modes_frame = ctk.CTkFrame(tele_card, fg_color="transparent")
@@ -3387,7 +3409,15 @@ class FreecameAutoApp(ctk.CTk):
                                 is_monitored = True
 
                             if is_monitored and s.get("telegram_alert_enabled", False):
-                                timeout_limit = int(s.get("telegram_timeout", 300))
+                                step_timeout_str = str(s.get("telegram_timeout", "")).strip()
+                                if step_timeout_str.isdigit():
+                                    timeout_limit = int(step_timeout_str)
+                                else:
+                                    try:
+                                        timeout_limit = int(self.telegram_global_timeout_var.get())
+                                    except ValueError:
+                                        timeout_limit = 300
+                                        
                                 last_trig = s.get("_last_trigger_time", now)
                                 alert_sent = s.get("_telegram_alert_sent", False)
                                 
@@ -3871,6 +3901,7 @@ class FreecameAutoApp(ctk.CTk):
             "telegram_global_enabled": self.telegram_global_enabled_var.get(),
             "telegram_bot_token": self.telegram_bot_token_var.get().strip(),
             "telegram_chat_id": self.telegram_chat_id_var.get().strip(),
+            "telegram_global_timeout": self.telegram_global_timeout_var.get().strip(),
             "telegram_monitor_normal": self.telegram_monitor_normal_var.get(),
             "telegram_monitor_counting": self.telegram_monitor_counting_var.get(),
             "telegram_monitor_ocr": self.telegram_monitor_ocr_var.get(),
@@ -3969,6 +4000,8 @@ class FreecameAutoApp(ctk.CTk):
             self.telegram_bot_token_var.set(config_data["telegram_bot_token"])
         if "telegram_chat_id" in config_data:
             self.telegram_chat_id_var.set(config_data["telegram_chat_id"])
+        if "telegram_global_timeout" in config_data:
+            self.telegram_global_timeout_var.set(config_data["telegram_global_timeout"])
         if "telegram_monitor_normal" in config_data:
             self.telegram_monitor_normal_var.set(config_data["telegram_monitor_normal"])
         if "telegram_monitor_counting" in config_data:
