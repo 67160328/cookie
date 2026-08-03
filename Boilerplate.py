@@ -426,6 +426,11 @@ class FreecameAutoApp(ctk.CTk):
         self.steps = []
         self.turbo_mode_var = tk.BooleanVar(value=True)
         
+        # Telegram Notification Settings
+        self.telegram_bot_token_var = tk.StringVar(value="")
+        self.telegram_chat_id_var = tk.StringVar(value="")
+        self.telegram_global_enabled_var = tk.BooleanVar(value=False)
+        
         # Analytics Data
         self.stats_data = {
             "start_time": None,
@@ -676,6 +681,7 @@ class FreecameAutoApp(ctk.CTk):
         self.tab_bot = self.tabview.add("🤖 ตั้งค่าบอตปกติ")
         self.tab_detection = self.tabview.add("🔍 นับวัตถุ & OCR")
         self.tab_analytics = self.tabview.add("📊 แดชบอร์ดวิเคราะห์ผล")
+        self.tab_settings = self.tabview.add("⚙️ ตั้งค่าระบบ")
         
         # =========================================================================
         # TAB 1: NORMAL BOT SETUP
@@ -772,11 +778,170 @@ class FreecameAutoApp(ctk.CTk):
         # TAB 2: ANALYTICS DASHBOARD
         # =========================================================================
         self.setup_analytics_tab()
+        self.setup_settings_tab()
 
         # Log status info
         self.add_log("[*] ระบบ Freecame Auto Multi-Step พร้อมใช้งาน")
         self.add_log("[*] แต่ละเงื่อนไขสามารถเพิ่มจุดคลิกได้หลายจุด กดปุ่ม '+ เพิ่มจุดคลิก' เพื่อระบุหลายพิกัด")
         self.add_log("[*] กดปุ่ม 'ESC' ที่คีย์บอร์ดเพื่อหยุดการทำงานฉุกเฉินได้ตลอดเวลา")
+
+    def setup_settings_tab(self):
+        # Settings frame container
+        settings_container = ctk.CTkScrollableFrame(
+            self.tab_settings,
+            fg_color=BG_COLOR,
+            scrollbar_button_color=CARD_BG
+        )
+        settings_container.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        # Telegram Notification Settings Card
+        tele_card = ctk.CTkFrame(settings_container, fg_color=CARD_BG, corner_radius=8, border_color=("#CBD5E1", "#1E293B"), border_width=1)
+        tele_card.pack(fill="x", padx=10, pady=10)
+        
+        ctk.CTkLabel(
+            tele_card,
+            text="✈️ ตั้งค่าการแจ้งเตือน Telegram (Telegram Alert Settings)",
+            font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"),
+            text_color=ACCENT_ORANGE
+        ).pack(anchor="w", padx=20, pady=(15, 10))
+        
+        # Enable Switch
+        switch_frame = ctk.CTkFrame(tele_card, fg_color="transparent")
+        switch_frame.pack(fill="x", padx=20, pady=5)
+        
+        tele_switch = ctk.CTkSwitch(
+            switch_frame,
+            text="เปิดใช้งานระบบแจ้งเตือนผ่าน Telegram (Global Telegram Alerts)",
+            variable=self.telegram_global_enabled_var,
+            progress_color=ACCENT_ORANGE,
+            button_color=ACCENT_ORANGE,
+            button_hover_color=ACCENT_HOVER,
+            text_color=TEXT_COLOR,
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold")
+        )
+        tele_switch.pack(side="left")
+        
+        # Bot Token Input
+        token_frame = ctk.CTkFrame(tele_card, fg_color="transparent")
+        token_frame.pack(fill="x", padx=20, pady=8)
+        ctk.CTkLabel(token_frame, text="Telegram Bot Token:", font=ctk.CTkFont(size=12), text_color=TEXT_COLOR, width=150, anchor="w").pack(side="left")
+        
+        token_entry = ctk.CTkEntry(
+            token_frame,
+            textvariable=self.telegram_bot_token_var,
+            placeholder_text="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ...",
+            font=ctk.CTkFont(family="Consolas", size=11),
+            fg_color=("#FFFFFF", "#0F0F11"),
+            text_color=TEXT_COLOR,
+            border_color=("#CBD5E1", "#1E293B"),
+            border_width=1,
+            height=28
+        )
+        token_entry.pack(side="left", fill="x", expand=True, padx=(10, 0))
+        
+        # Chat ID Input
+        chat_frame = ctk.CTkFrame(tele_card, fg_color="transparent")
+        chat_frame.pack(fill="x", padx=20, pady=8)
+        ctk.CTkLabel(chat_frame, text="Telegram Chat ID:", font=ctk.CTkFont(size=12), text_color=TEXT_COLOR, width=150, anchor="w").pack(side="left")
+        
+        chat_entry = ctk.CTkEntry(
+            chat_frame,
+            textvariable=self.telegram_chat_id_var,
+            placeholder_text="-100123456789 (หรือ Chat ID ส่วนตัว)",
+            font=ctk.CTkFont(family="Consolas", size=11),
+            fg_color=("#FFFFFF", "#0F0F11"),
+            text_color=TEXT_COLOR,
+            border_color=("#CBD5E1", "#1E293B"),
+            border_width=1,
+            height=28
+        )
+        chat_entry.pack(side="left", fill="x", expand=True, padx=(10, 0))
+        
+        # Test Connection Button
+        btn_test = ctk.CTkButton(
+            tele_card,
+            corner_radius=8,
+            text="⚡ ทดสอบส่งข้อความ (Test Telegram Alert)",
+            fg_color=("#E2E8F0", "#1E293B"),
+            hover_color=ACCENT_ORANGE,
+            text_color=TEXT_COLOR,
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            command=self.send_test_telegram_alert,
+            height=30
+        )
+        btn_test.pack(anchor="w", padx=20, pady=(10, 20))
+
+    def send_test_telegram_alert(self):
+        token = self.telegram_bot_token_var.get().strip()
+        chat_id = self.telegram_chat_id_var.get().strip()
+        
+        if not token or not chat_id:
+            messagebox.showwarning("แจ้งเตือน", "กรุณากรอก Telegram Bot Token และ Chat ID ให้ครบถ้วนก่อนการทดสอบ")
+            return
+            
+        self.add_log("[*] กำลังส่งข้อความทดสอบไปยัง Telegram...")
+        
+        def worker():
+            try:
+                import urllib.request
+                import urllib.parse
+                import json
+                
+                url = f"https://api.telegram.org/bot{token}/sendMessage"
+                msg_text = "<b>[Freecame Auto Test]</b>\n🔔 การทดสอบเชื่อมต่อแจ้งเตือน Telegram สำเร็จเรียบร้อยแล้ว!"
+                data = urllib.parse.urlencode({
+                    "chat_id": chat_id,
+                    "text": msg_text,
+                    "parse_mode": "HTML"
+                }).encode("utf-8")
+                
+                req = urllib.request.Request(url, data=data, method="POST")
+                with urllib.request.urlopen(req, timeout=5) as response:
+                    res = json.loads(response.read().decode("utf-8"))
+                    if res.get("ok"):
+                        self.add_log(f"[✓] ส่งข้อความทดสอบ Telegram สำเร็จ!")
+                        messagebox.showinfo("สำเร็จ", "ส่งข้อความทดสอบสำเร็จ! กรุณาตรวจสอบในห้องแชท Telegram ของคุณ")
+                    else:
+                        desc = res.get('description', 'Unknown API Error')
+                        self.add_log(f"[Error] Telegram API error: {desc}")
+                        messagebox.showerror("ล้มเหลว", f"เกิดข้อผิดพลาดจาก Telegram API:\n{desc}")
+            except Exception as e:
+                self.add_log(f"[Error] ไม่สามารถส่งแจ้งเตือน Telegram ได้: {e}")
+                messagebox.showerror("ล้มเหลว", f"ไม่สามารถเชื่อมต่อหรือส่งสัญญาณไปยัง Telegram ได้:\n{e}")
+                
+        threading.Thread(target=worker, daemon=True).start()
+
+    def send_telegram_notification(self, message):
+        token = self.telegram_bot_token_var.get().strip()
+        chat_id = self.telegram_chat_id_var.get().strip()
+        
+        if not token or not chat_id:
+            return
+            
+        def worker():
+            try:
+                import urllib.request
+                import urllib.parse
+                import json
+                
+                url = f"https://api.telegram.org/bot{token}/sendMessage"
+                data = urllib.parse.urlencode({
+                    "chat_id": chat_id,
+                    "text": message,
+                    "parse_mode": "HTML"
+                }).encode("utf-8")
+                
+                req = urllib.request.Request(url, data=data, method="POST")
+                with urllib.request.urlopen(req, timeout=5) as response:
+                    res = json.loads(response.read().decode("utf-8"))
+                    if res.get("ok"):
+                        self.add_log(f"[✓] ส่งแจ้งเตือน Telegram สำเร็จ")
+                    else:
+                        self.add_log(f"[Error] Telegram API error: {res.get('description')}")
+            except Exception as e:
+                self.add_log(f"[Error] ไม่สามารถส่งแจ้งเตือน Telegram ได้: {e}")
+                
+        threading.Thread(target=worker, daemon=True).start()
 
     def setup_analytics_tab(self):
         # Top metric cards container
@@ -1177,6 +1342,14 @@ class FreecameAutoApp(ctk.CTk):
             # Step Name
             "step_name": "",
             "step_name_entry": None,
+            
+            # Telegram alerting fields
+            "telegram_alert_enabled": False,
+            "telegram_timeout": 300,
+            "telegram_alert_enabled_checkbox": None,
+            "telegram_timeout_entry": None,
+            "_last_trigger_time": time.time(),
+            "_telegram_alert_sent": False,
         }
         
         card = ctk.CTkFrame(scroll_container, fg_color=CARD_BG, corner_radius=8)
@@ -1879,8 +2052,74 @@ class FreecameAutoApp(ctk.CTk):
         self.change_step_mode(step_id, mode)
         self.add_log(f"[+] เพิ่มขั้นตอนที่ {len(self.steps)} โหมด: {mode}")
         
+        # 4. Telegram Notification Footer settings for each step card
+        footer_row = ctk.CTkFrame(card, fg_color="transparent")
+        footer_row.pack(fill="x", padx=15, pady=(2, 8))
+        
+        telegram_alert_var = ctk.BooleanVar(value=step_data["telegram_alert_enabled"])
+        
+        def toggle_step_telegram_alert(var=telegram_alert_var, sid=step_id):
+            self.update_step_telegram_alert(sid, var.get())
+            
+        chk_tele = ctk.CTkCheckBox(
+            footer_row,
+            text="🔔 แจ้งเตือน Telegram หากเงื่อนไขค้าง",
+            variable=telegram_alert_var,
+            command=toggle_step_telegram_alert,
+            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+            checkbox_width=14,
+            checkbox_height=14,
+            border_width=1.5,
+            border_color=("#94A3B8", "#475569"),
+            hover_color=ACCENT_HOVER,
+            fg_color=ACCENT_ORANGE,
+            text_color=TEXT_COLOR
+        )
+        chk_tele.pack(side="left")
+        step_data["telegram_alert_enabled_checkbox"] = chk_tele
+        
+        ctk.CTkLabel(footer_row, text=" เกิน:", font=ctk.CTkFont(size=10), text_color=TEXT_MUTED).pack(side="left")
+        
+        tele_timeout_entry = ctk.CTkEntry(
+            footer_row,
+            width=45,
+            height=20,
+            font=ctk.CTkFont(family="Consolas", size=9, weight="bold"),
+            fg_color=("#FFFFFF", "#0F0F11"),
+            text_color=ACCENT_ORANGE,
+            border_color=("#CBD5E1", "#1E293B"),
+            border_width=1,
+            justify="center",
+            placeholder_text="300"
+        )
+        tele_timeout_entry.insert(0, str(step_data["telegram_timeout"]))
+        tele_timeout_entry.pack(side="left", padx=2)
+        step_data["telegram_timeout_entry"] = tele_timeout_entry
+        
+        ctk.CTkLabel(footer_row, text="วินาที", font=ctk.CTkFont(size=10), text_color=TEXT_MUTED).pack(side="left")
+        
+        def on_tele_timeout_keypress(event, s_id=step_id, entry=tele_timeout_entry):
+            self.update_step_telegram_timeout(s_id, entry.get())
+            
+        tele_timeout_entry.bind("<KeyRelease>", on_tele_timeout_keypress)
+        tele_timeout_entry.bind("<FocusOut>", on_tele_timeout_keypress)
+
         # Auto scroll to bottom
         scroll_container._parent_canvas.yview_moveto(1.0)
+
+    def update_step_telegram_alert(self, step_id, enabled):
+        step = next((s for s in self.steps if s["id"] == step_id), None)
+        if step:
+            step["telegram_alert_enabled"] = enabled
+
+    def update_step_telegram_timeout(self, step_id, value_str):
+        step = next((s for s in self.steps if s["id"] == step_id), None)
+        if step:
+            try:
+                val = int(value_str)
+                step["telegram_timeout"] = max(1, val)
+            except ValueError:
+                pass
 
     def add_counting_target(self, step_id):
         step = next((s for s in self.steps if s["id"] == step_id), None)
@@ -3017,6 +3256,12 @@ class FreecameAutoApp(ctk.CTk):
                     self.add_log(f"[Warning] ขั้นตอนที่ {i + 1} (บวกเลข OCR) กรุณากำหนดขอบเขตสแกนเพื่ออ่านค่าตัวเลข!")
                     return
                 
+        # Initialize Telegram timeout variables
+        now = time.time()
+        for step in self.steps:
+            step["_last_trigger_time"] = now
+            step["_telegram_alert_sent"] = False
+
         self.bot_running = True
         self.stats_data["start_time"] = time.time()
         self.status_badge.configure(text="RUNNING", fg_color=STATUS_ACTIVE)
@@ -3060,6 +3305,28 @@ class FreecameAutoApp(ctk.CTk):
                 if time.time() - last_scan_heartbeat >= 1.0:
                     self.stats_data["total_scan_cycles"] += 1
                     last_scan_heartbeat = time.time()
+                    
+                    # Check Telegram timeouts
+                    if self.telegram_global_enabled_var.get():
+                        now = time.time()
+                        for s_idx, s in enumerate(self.steps):
+                            if s.get("telegram_alert_enabled", False):
+                                timeout_limit = int(s.get("telegram_timeout", 300))
+                                last_trig = s.get("_last_trigger_time", now)
+                                alert_sent = s.get("_telegram_alert_sent", False)
+                                
+                                if (now - last_trig) > timeout_limit and not alert_sent:
+                                    s["_telegram_alert_sent"] = True
+                                    step_name_str = s.get("step_name", "").strip()
+                                    s_name = f"'{step_name_str}'" if step_name_str else f"หมายเลข {s_idx + 1}"
+                                    
+                                    alert_msg = (
+                                        f"⚠️ <b>[Freecame Auto Alert]</b>\n"
+                                        f"ขั้นตอน: <b>{s_name}</b> (โหมด: {s.get('mode')})\n"
+                                        f"🚨 <b>ไม่ตรวจพบภาพต้นแบบหรือทำงานตามเงื่อนไขนานเกิน {timeout_limit} วินาทีแล้ว!</b>\n"
+                                        f"กรุณาตรวจสอบระบบตัวบอต"
+                                    )
+                                    self.send_telegram_notification(alert_msg)
 
                 with mss.MSS() as sct:
                     monitor = sct.monitors[1]
@@ -3111,6 +3378,10 @@ class FreecameAutoApp(ctk.CTk):
                         if max_val >= threshold:
                             sid = step["id"]
                             self.stats_data["triggers_count"][sid] = self.stats_data["triggers_count"].get(sid, 0) + 1
+                            step["_last_trigger_time"] = time.time()
+                            step["_telegram_alert_sent"] = False
+                            step["_last_trigger_time"] = time.time()
+                            step["_telegram_alert_sent"] = False
                             
                             click_targets = step["click_targets"]
                             if not click_targets:
@@ -3313,6 +3584,8 @@ class FreecameAutoApp(ctk.CTk):
 
                         sid = step["id"]
                         self.stats_data["triggers_count"][sid] = self.stats_data["triggers_count"].get(sid, 0) + 1
+                        step["_last_trigger_time"] = time.time()
+                        step["_telegram_alert_sent"] = False
                         
                         summary_log = " | ".join(target_results_str)
                         if summary_log:
@@ -3391,6 +3664,8 @@ class FreecameAutoApp(ctk.CTk):
                                 
                             sid = step["id"]
                             self.stats_data["triggers_count"][sid] = self.stats_data["triggers_count"].get(sid, 0) + 1
+                            step["_last_trigger_time"] = time.time()
+                            step["_telegram_alert_sent"] = False
                         except Exception as e:
                             self.add_log(f"[Error OCR] {e}")
                             
@@ -3517,6 +3792,9 @@ class FreecameAutoApp(ctk.CTk):
         config_data = {
             "version": 3,
             "turbo_mode": self.turbo_mode_var.get(),
+            "telegram_global_enabled": self.telegram_global_enabled_var.get(),
+            "telegram_bot_token": self.telegram_bot_token_var.get().strip(),
+            "telegram_chat_id": self.telegram_chat_id_var.get().strip(),
             "steps": []
         }
 
@@ -3554,7 +3832,9 @@ class FreecameAutoApp(ctk.CTk):
                 "type_text": step.get("type_text", ""),
                 "search_region": step.get("search_region"),
                 "click_targets": clean_targets,
-                "counting_targets": clean_counting
+                "counting_targets": clean_counting,
+                "telegram_alert_enabled": step.get("telegram_alert_enabled", False),
+                "telegram_timeout": step.get("telegram_timeout", 300)
             }
             config_data["steps"].append(step_entry)
 
@@ -3604,6 +3884,12 @@ class FreecameAutoApp(ctk.CTk):
 
         if "turbo_mode" in config_data:
             self.turbo_mode_var.set(config_data["turbo_mode"])
+        if "telegram_global_enabled" in config_data:
+            self.telegram_global_enabled_var.set(config_data["telegram_global_enabled"])
+        if "telegram_bot_token" in config_data:
+            self.telegram_bot_token_var.set(config_data["telegram_bot_token"])
+        if "telegram_chat_id" in config_data:
+            self.telegram_chat_id_var.set(config_data["telegram_chat_id"])
 
         filename = os.path.basename(file_path)
         loaded_count = 0
@@ -3620,6 +3906,22 @@ class FreecameAutoApp(ctk.CTk):
             if "step_name_entry" in step and step["step_name_entry"].winfo_exists():
                 step["step_name_entry"].delete(0, "end")
                 step["step_name_entry"].insert(0, step_name)
+                
+            # Restore Telegram settings
+            tele_enabled = step_entry.get("telegram_alert_enabled", False)
+            tele_timeout = step_entry.get("telegram_timeout", 300)
+            step["telegram_alert_enabled"] = tele_enabled
+            step["telegram_timeout"] = tele_timeout
+            
+            if "telegram_alert_enabled_checkbox" in step and step["telegram_alert_enabled_checkbox"].winfo_exists():
+                if tele_enabled:
+                    step["telegram_alert_enabled_checkbox"].select()
+                else:
+                    step["telegram_alert_enabled_checkbox"].deselect()
+                    
+            if "telegram_timeout_entry" in step and step["telegram_timeout_entry"].winfo_exists():
+                step["telegram_timeout_entry"].delete(0, "end")
+                step["telegram_timeout_entry"].insert(0, str(tele_timeout))
 
             tmpl = step_entry.get("template_path")
             if tmpl and os.path.isfile(tmpl):
