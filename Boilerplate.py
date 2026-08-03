@@ -430,6 +430,9 @@ class FreecameAutoApp(ctk.CTk):
         self.telegram_bot_token_var = tk.StringVar(value="")
         self.telegram_chat_id_var = tk.StringVar(value="")
         self.telegram_global_enabled_var = tk.BooleanVar(value=False)
+        self.telegram_monitor_normal_var = tk.BooleanVar(value=True)
+        self.telegram_monitor_counting_var = tk.BooleanVar(value=True)
+        self.telegram_monitor_ocr_var = tk.BooleanVar(value=True)
         
         # Analytics Data
         self.stats_data = {
@@ -857,6 +860,47 @@ class FreecameAutoApp(ctk.CTk):
         )
         chat_entry.pack(side="left", fill="x", expand=True, padx=(10, 0))
         
+        # Checkboxes for mode monitoring selection
+        modes_frame = ctk.CTkFrame(tele_card, fg_color="transparent")
+        modes_frame.pack(fill="x", padx=20, pady=8)
+        ctk.CTkLabel(modes_frame, text="โหมดที่ต้องการตรวจสอบแจ้งเตือน:", font=ctk.CTkFont(size=12, weight="bold"), text_color=TEXT_COLOR).pack(anchor="w", pady=(0, 4))
+        
+        chk_mon_normal = ctk.CTkCheckBox(
+            modes_frame,
+            text="🤖 บอตปกติ",
+            variable=self.telegram_monitor_normal_var,
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            checkbox_width=16,
+            checkbox_height=16,
+            border_width=1.5,
+            fg_color=ACCENT_ORANGE
+        )
+        chk_mon_normal.pack(side="left", padx=(0, 15))
+        
+        chk_mon_counting = ctk.CTkCheckBox(
+            modes_frame,
+            text="🔍 นับวัตถุ",
+            variable=self.telegram_monitor_counting_var,
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            checkbox_width=16,
+            checkbox_height=16,
+            border_width=1.5,
+            fg_color=ACCENT_ORANGE
+        )
+        chk_mon_counting.pack(side="left", padx=(0, 15))
+        
+        chk_mon_ocr = ctk.CTkCheckBox(
+            modes_frame,
+            text="🔢 บวกเลข OCR",
+            variable=self.telegram_monitor_ocr_var,
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            checkbox_width=16,
+            checkbox_height=16,
+            border_width=1.5,
+            fg_color=ACCENT_ORANGE
+        )
+        chk_mon_ocr.pack(side="left")
+
         # Test Connection Button
         btn_test = ctk.CTkButton(
             tele_card,
@@ -3310,7 +3354,16 @@ class FreecameAutoApp(ctk.CTk):
                     if self.telegram_global_enabled_var.get():
                         now = time.time()
                         for s_idx, s in enumerate(self.steps):
-                            if s.get("telegram_alert_enabled", False):
+                            s_mode = s.get("mode", "บอตปกติ")
+                            is_monitored = False
+                            if s_mode == "บอตปกติ" and self.telegram_monitor_normal_var.get():
+                                is_monitored = True
+                            elif s_mode == "นับวัตถุ" and self.telegram_monitor_counting_var.get():
+                                is_monitored = True
+                            elif s_mode == "บวกเลข OCR" and self.telegram_monitor_ocr_var.get():
+                                is_monitored = True
+
+                            if is_monitored and s.get("telegram_alert_enabled", False):
                                 timeout_limit = int(s.get("telegram_timeout", 300))
                                 last_trig = s.get("_last_trigger_time", now)
                                 alert_sent = s.get("_telegram_alert_sent", False)
@@ -3795,6 +3848,9 @@ class FreecameAutoApp(ctk.CTk):
             "telegram_global_enabled": self.telegram_global_enabled_var.get(),
             "telegram_bot_token": self.telegram_bot_token_var.get().strip(),
             "telegram_chat_id": self.telegram_chat_id_var.get().strip(),
+            "telegram_monitor_normal": self.telegram_monitor_normal_var.get(),
+            "telegram_monitor_counting": self.telegram_monitor_counting_var.get(),
+            "telegram_monitor_ocr": self.telegram_monitor_ocr_var.get(),
             "steps": []
         }
 
@@ -3890,6 +3946,12 @@ class FreecameAutoApp(ctk.CTk):
             self.telegram_bot_token_var.set(config_data["telegram_bot_token"])
         if "telegram_chat_id" in config_data:
             self.telegram_chat_id_var.set(config_data["telegram_chat_id"])
+        if "telegram_monitor_normal" in config_data:
+            self.telegram_monitor_normal_var.set(config_data["telegram_monitor_normal"])
+        if "telegram_monitor_counting" in config_data:
+            self.telegram_monitor_counting_var.set(config_data["telegram_monitor_counting"])
+        if "telegram_monitor_ocr" in config_data:
+            self.telegram_monitor_ocr_var.set(config_data["telegram_monitor_ocr"])
 
         filename = os.path.basename(file_path)
         loaded_count = 0
