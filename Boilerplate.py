@@ -1439,6 +1439,8 @@ class FreecameAutoApp(ctk.CTk):
             "telegram_timeout_entry": None,
             "_last_trigger_time": time.time(),
             "_telegram_alert_sent": False,
+            "enabled": True,
+            "enabled_checkbox": None,
         }
         
         card = ctk.CTkFrame(scroll_container, fg_color=CARD_BG, corner_radius=8)
@@ -1448,6 +1450,28 @@ class FreecameAutoApp(ctk.CTk):
         
         header_row = ctk.CTkFrame(card, fg_color="transparent")
         header_row.pack(fill="x", padx=15, pady=(10, 5))
+        
+        # Enabled/Disabled Checkbox
+        enabled_var = ctk.BooleanVar(value=True)
+        
+        def toggle_step_enabled(var=enabled_var, sid=step_id):
+            self.update_step_enabled(sid, var.get())
+            
+        chk_enabled = ctk.CTkCheckBox(
+            header_row,
+            text="",
+            variable=enabled_var,
+            command=toggle_step_enabled,
+            width=20,
+            checkbox_width=18,
+            checkbox_height=18,
+            border_width=2,
+            border_color=("#94A3B8", "#475569"),
+            hover_color=ACCENT_HOVER,
+            fg_color=ACCENT_ORANGE
+        )
+        chk_enabled.pack(side="left", padx=(0, 5))
+        step_data["enabled_checkbox"] = chk_enabled
         
         title_lbl = ctk.CTkLabel(
             header_row, 
@@ -2423,9 +2447,30 @@ class FreecameAutoApp(ctk.CTk):
             self.add_log(f"[-] ลบขั้นตอนที่ {idx + 1} เรียบร้อย")
             self.reindex_steps()
 
+    def update_step_enabled(self, step_id, enabled):
+        step = next((s for s in self.steps if s["id"] == step_id), None)
+        if step:
+            step["enabled"] = enabled
+            self.reindex_steps()
+            
+            # Change card frame styling
+            if not enabled:
+                step["card_frame"].configure(border_color=("#CBD5E1", "#1E293B"), border_width=1)
+                self.add_log(f"[*] ปิดใช้งานขั้นตอนที่ {self.steps.index(step) + 1} ชั่วคราว")
+            else:
+                step["card_frame"].configure(border_width=0)
+                self.add_log(f"[*] เปิดใช้งานขั้นตอนที่ {self.steps.index(step) + 1} อีกครั้ง")
+
     def reindex_steps(self):
         for i, step in enumerate(self.steps):
-            step["title_label"].configure(text=f"ขั้นตอนที่ {i + 1}")
+            enabled = step.get("enabled", True)
+            t_text = f"ขั้นตอนที่ {i + 1}"
+            if not enabled:
+                t_text += " (ปิดใช้งาน)"
+            step["title_label"].configure(
+                text=t_text,
+                text_color=TEXT_MUTED if not enabled else ACCENT_ORANGE
+            )
             if "index_entry" in step and step["index_entry"].winfo_exists():
                 step["index_entry"].delete(0, "end")
                 step["index_entry"].insert(0, str(i + 1))
@@ -3399,6 +3444,8 @@ class FreecameAutoApp(ctk.CTk):
                     if self.telegram_global_enabled_var.get():
                         now = time.time()
                         for s_idx, s in enumerate(self.steps):
+                            if not s.get("enabled", True):
+                                continue
                             s_mode = s.get("mode", "บอตปกติ")
                             is_monitored = False
                             if s_mode == "บอตปกติ" and self.telegram_monitor_normal_var.get():
@@ -3443,6 +3490,8 @@ class FreecameAutoApp(ctk.CTk):
                 condition_triggered = False
                 
                 for i, step in enumerate(self.steps):
+                    if not step.get("enabled", True):
+                        continue
                     mode = step.get("mode", "บอตปกติ")
                     
                     if mode == "บอตปกติ":
@@ -3944,7 +3993,8 @@ class FreecameAutoApp(ctk.CTk):
                 "click_targets": clean_targets,
                 "counting_targets": clean_counting,
                 "telegram_alert_enabled": step.get("telegram_alert_enabled", False),
-                "telegram_timeout": step.get("telegram_timeout", 300)
+                "telegram_timeout": step.get("telegram_timeout", 300),
+                "enabled": step.get("enabled", True)
             }
             config_data["steps"].append(step_entry)
 
@@ -4030,6 +4080,19 @@ class FreecameAutoApp(ctk.CTk):
             tele_timeout = step_entry.get("telegram_timeout", 300)
             step["telegram_alert_enabled"] = tele_enabled
             step["telegram_timeout"] = tele_timeout
+            
+            # Restore Enabled status
+            step_enabled = step_entry.get("enabled", True)
+            step["enabled"] = step_enabled
+            
+            if "enabled_checkbox" in step and step["enabled_checkbox"].winfo_exists():
+                if step_enabled:
+                    step["enabled_checkbox"].select()
+                else:
+                    step["enabled_checkbox"].deselect()
+            
+            if not step_enabled:
+                step["card_frame"].configure(border_color=("#CBD5E1", "#1E293B"), border_width=1)
             
             if "telegram_alert_enabled_checkbox" in step and step["telegram_alert_enabled_checkbox"].winfo_exists():
                 if tele_enabled:
